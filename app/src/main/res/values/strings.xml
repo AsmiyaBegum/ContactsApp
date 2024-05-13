@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">ContactsApp</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
+    <string name="phone">Phone</string>
+    <string name="email">Email</string>
+    <string name="save_changes">Save Changes</string>
+</resources>

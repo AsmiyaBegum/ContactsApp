@@ -176,7 +176,7 @@ fun ContactList(
                     text = group.toString(),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(colorResource(id = R.color.grey))
+                        .background(MaterialTheme.colorScheme.inverseOnSurface)
                         .padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
                 )
             }
@@ -260,7 +260,7 @@ fun ContactItem(contact: Contact,onItemClick: (Contact) -> Unit) {
                modifier = Modifier
                    .size(50.dp)
                    .clip(CircleShape)
-                   .background(color = Color.LightGray)
+                   .background(MaterialTheme.colorScheme.inversePrimary)
            ){
                Text(
                    text = contactName.toUpperCase(Locale.ROOT),
@@ -308,7 +308,7 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         if (isGranted) {
-            viewModel.loadcontacts(context.contentResolver)
+            viewModel.loadcontacts(context)
         } else {
 
         }
@@ -328,7 +328,7 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
         if(selectedTabIndex == 0 && !readContactPermissionState.status.isGranted){
 
         }else{
-            viewModel.loadcontacts(context.contentResolver)
+            viewModel.loadcontacts(context)
         }
     }
 
@@ -338,16 +338,16 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
             FloatingActionButton(
                 onClick = {
 //                    requestPermission(Manifest.permission.WRITE_CONTACTS)
-                    navController.navigate(Route.CONTACT_CREATE_SCREEN){
+                    navController.navigate("${Route.CONTACT_CREATE_SCREEN}/${Gson().toJson(Contact())}"){
                     launchSingleTop = true
                 }
                           },
-                containerColor = Color.Black
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
             ) {
                 Icon(
                     imageVector = Icons.Default.Add,
                     contentDescription = "Add Contact",
-                    tint = Color.White)
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer)
             }
         }
     ) { padding ->
@@ -457,7 +457,9 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
                     .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
                 onClick = {
                     openAppSettings()
-                }
+                },
+                buttonColor = MaterialTheme.colorScheme.secondary,
+                buttonContentColor = MaterialTheme.colorScheme.onSecondary
             )
 
 

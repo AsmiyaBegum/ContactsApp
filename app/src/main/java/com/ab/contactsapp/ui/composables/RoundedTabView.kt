@@ -3,6 +3,7 @@ package com.ab.contactsapp.ui.composables
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.TabRowDefaults
@@ -31,13 +32,11 @@ fun RoundedTabView(
             modifier = Modifier
                 .fillMaxSize()
                 .clip(RoundedCornerShape(16.dp))
-                .background(color = Color.LightGray)
             ,
             indicator = { tabPositions ->
                 TabRowDefaults.Indicator(
-                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex])
-                        .background(color = Color.Gray),
-                    color = Color.Unspecified, // Color of the indicator
+                    Modifier.tabIndicatorOffset(tabPositions[selectedTabIndex]),
+                    color = MaterialTheme.colorScheme.surface, // Color of the indicator
                     height = 0.dp
                     // Height of the indicator
                 )
@@ -49,13 +48,13 @@ fun RoundedTabView(
                 onClick = { onTabSelected(index) },
                     modifier = Modifier
                         .background(
-                            color = if (selectedTabIndex == index) Color.Black else Color.Transparent, // Color of selected tab
+                            color = if (selectedTabIndex == index) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surface, // Color of selected tab
                             shape = RoundedCornerShape(16.dp) // Rounded corner shape
                         ),
                     text = {
                         Text(
                             text,
-                            color = Color.LightGray
+                            color = if (selectedTabIndex == index) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurface, // Color of selected tab
                         )
                     }
                 )

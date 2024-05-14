@@ -18,12 +18,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -51,10 +50,12 @@ import com.ab.contactsapp.ui.contact_list.ContactItem
 import com.ab.contactsapp.utils.Constants
 import com.skydoves.cloudy.Cloudy
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.graphics.asImageBitmap
@@ -65,12 +66,16 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.navArgument
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.domain.contact.Contact
+import com.ab.contactsapp.domain.contact.Route
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import com.google.gson.Gson
 import java.io.ByteArrayInputStream
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -79,152 +84,158 @@ import java.util.Date
 
 @Composable
 fun ContactDetailScreen(
+    navController: NavController,
     viewModel: ContactListViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
     onMenuClicked: () -> Unit
 ) {
     var contact by remember { viewModel.contactState }
+    Scaffold(
+        modifier = Modifier.fillMaxSize()){ padding->
+        ConstraintLayout(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+            val (backgroundImage, clearImage, backButton, menuButton, nameText, numberText,contactActionRow, tabView) = createRefs()
 
-    ConstraintLayout(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        val (backgroundImage, clearImage, backButton, menuButton, nameText, numberText,contactActionRow, tabView) = createRefs()
-
-      Box(modifier = Modifier
-          .fillMaxWidth()
-          .height(280.dp)
-          .constrainAs(backgroundImage) {
-              top.linkTo(parent.top)
-              start.linkTo(parent.start)
-              end.linkTo(parent.end)
-          }) {
+            Box(modifier = Modifier
+                .fillMaxWidth()
+                .height(280.dp)
+                .constrainAs(backgroundImage) {
+                    top.linkTo(parent.top)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }) {
 //          Cloudy(radius = 25) {
-          if(contact?.photo !=null){
-              Image(
-                  painter = rememberAsyncImagePainter(contact!!.photo),
-                  contentDescription = "Photo",
-                  modifier = Modifier.fillMaxWidth(),
-                  contentScale = ContentScale.Crop
-              )
-          }
+                if(contact?.photo !=null){
+                    Image(
+                        painter = rememberAsyncImagePainter(contact!!.photo),
+                        contentDescription = "Photo",
+                        modifier = Modifier.fillMaxWidth(),
+                        contentScale = ContentScale.Crop
+                    )
+                }
 
 //          }
 
-      }
+            }
 
 
-        Image(
-            painter = if(contact?.photo!=null)  rememberAsyncImagePainter(contact!!.photo) else painterResource(id = R.drawable.ic_bg_pic), // your clear image
-            contentDescription = null,
-            modifier = Modifier
-                .size(120.dp)
-                .constrainAs(clearImage) {
-                    top.linkTo(backgroundImage.bottom, margin = -80.dp)
-                    centerHorizontallyTo(parent)
-                }
-                .clip(RoundedCornerShape(25))
-            ,
-            contentScale = ContentScale.Crop
-        )
-
-        IconButton(
-            onClick = onBackClicked,
-            modifier = Modifier
-                .constrainAs(backButton) {
-                    top.linkTo(parent.top, margin = 16.dp)
-                    start.linkTo(parent.start, margin = 16.dp)
-                }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_arrow_back), // your back icon
-                tint = Color.Black,
-                contentDescription = "Back"
+            Image(
+                painter = if(contact?.photo!=null)  rememberAsyncImagePainter(contact!!.photo) else painterResource(id = R.drawable.ic_bg_pic), // your clear image
+                contentDescription = null,
+                modifier = Modifier
+                    .size(120.dp)
+                    .constrainAs(clearImage) {
+                        top.linkTo(backgroundImage.bottom, margin = -80.dp)
+                        centerHorizontallyTo(parent)
+                    }
+                    .clip(RoundedCornerShape(25))
+                ,
+                contentScale = ContentScale.Crop
             )
-        }
 
-        IconButton(
-            onClick = onMenuClicked,
-            modifier = Modifier
-                .constrainAs(menuButton) {
-                    top.linkTo(parent.top, margin = 16.dp)
-                    end.linkTo(parent.end, margin = 16.dp)
+            IconButton(
+                onClick = onBackClicked,
+                modifier = Modifier
+                    .constrainAs(backButton) {
+                        top.linkTo(parent.top, margin = 16.dp)
+                        start.linkTo(parent.start, margin = 16.dp)
+                    }
+            ) {
+                RoundedBorderIcon(
+                    R.drawable.ic_arrow_back,
+                ){
+                    navController.popBackStack()
                 }
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.option_menu_icon), // your menu icon
-                tint = Color.Black,
-                contentDescription = "Menu"
+            }
+
+            IconButton(
+                onClick = onMenuClicked,
+                modifier = Modifier
+                    .constrainAs(menuButton) {
+                        top.linkTo(parent.top, margin = 16.dp)
+                        end.linkTo(parent.end, margin = 16.dp)
+                    }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.option_menu_icon), // your menu icon
+                    tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                    contentDescription = "Menu"
+                )
+            }
+
+            Text(
+                text = contact?.name?:"", // contact name
+                style = MaterialTheme.typography.titleLarge,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .constrainAs(nameText) {
+                        top.linkTo(clearImage.bottom, margin = 16.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+                    .padding(vertical = 10.dp, horizontal = 16.dp)
             )
-        }
 
-        Text(
-            text = contact?.name?:"", // contact name
-            style = MaterialTheme.typography.h5,
-            color = Color.Black,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .constrainAs(nameText) {
-                    top.linkTo(clearImage.bottom, margin = 16.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                }
-                .padding(vertical = 10.dp, horizontal = 16.dp)
-        )
+            Text(
+                text = contact?.phoneNumber?:"", // contact number
+                style = MaterialTheme.typography.titleMedium,
+                color = androidx.compose.material3.MaterialTheme.colorScheme.tertiary,
+                textAlign = TextAlign.Center,
+                modifier = Modifier
+                    .constrainAs(numberText) {
+                        top.linkTo(nameText.bottom, margin = 8.dp)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    }
+                    .padding(horizontal = 16.dp)
+            )
 
-        Text(
-            text = contact?.phoneNumber?:"", // contact number
-            style = MaterialTheme.typography.body1,
-            color = Color.Gray,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .constrainAs(numberText) {
-                    top.linkTo(nameText.bottom, margin = 8.dp)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                }
-                .padding(horizontal = 16.dp)
-        )
-
-        ContactActionsRow(
-            modifier = Modifier
-                .constrainAs(contactActionRow){
-                    top.linkTo(numberText.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                    width = Dimension.fillToConstraints
-                },
-            contact = contact!!
-        )
-
-        Box(modifier = Modifier
-            .constrainAs(tabView){
-                top.linkTo(contactActionRow.bottom)
-                start.linkTo(parent.start)
-                end.linkTo(parent.end)
-                bottom.linkTo(parent.bottom)
-                width = Dimension.fillToConstraints
-                height = Dimension.fillToConstraints
-            }) {
-
-            SocialMediaAndRecentTab(
-                modifier = Modifier,
+            ContactActionsRow(
+                modifier = Modifier
+                    .constrainAs(contactActionRow){
+                        top.linkTo(numberText.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                        width = Dimension.fillToConstraints
+                    },
                 contact = contact!!,
-                viewModel
+                navController
             )
+
+            Box(modifier = Modifier
+                .constrainAs(tabView){
+                    top.linkTo(contactActionRow.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                    bottom.linkTo(parent.bottom)
+                    width = Dimension.fillToConstraints
+                    height = Dimension.fillToConstraints
+                }) {
+
+                SocialMediaAndRecentTab(
+                    modifier = Modifier,
+                    contact = contact!!,
+                    viewModel
+                )
+            }
+
+
+
         }
-
-
-
     }
+
 }
 
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ContactActionsRow(modifier: Modifier, contact: Contact) {
+fun ContactActionsRow(modifier: Modifier, contact: Contact,navController: NavController) {
     val context = LocalContext.current
     val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
 
@@ -243,7 +254,6 @@ fun ContactActionsRow(modifier: Modifier, contact: Contact) {
             .fillMaxWidth()
             .padding(16.dp)
             .height(64.dp)
-//            .background(color = Color.LightGray, shape = RoundedCornerShape(16.dp))
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -251,7 +261,10 @@ fun ContactActionsRow(modifier: Modifier, contact: Contact) {
             modifier = Modifier.fillMaxSize()
         ) {
             RoundedBorderIcon( R.drawable.ic_share ) {
-                shareContact(context, contact = contact)
+                navController.navigate("${Route.CONTACT_CREATE_SCREEN}/${Gson().toJson(contact)}"){
+                    launchSingleTop = true
+                }
+//                shareContact(context, contact = contact)
             }
 
             Spacer(modifier = Modifier.width(16.dp))
@@ -444,7 +457,10 @@ fun SocialMediaListItem(platform : String, link : String?){
         ) {
             Icon(painter = painterResource(id = R.drawable.ic_message), contentDescription = "platform image")
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = link?:"")
+            Text(
+                text = link?:"",
+                style = MaterialTheme.typography.bodyMedium,
+            )
         }
         Divider(modifier = Modifier.padding(5.dp))
     }

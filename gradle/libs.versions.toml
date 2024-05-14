@@ -14,6 +14,7 @@ coil = "2.4.0"
 constraintlayout = "2.1.4"
 retrofit = "2.9.0"
 coroutines = "1.5.2"
+uiTextGoogleFonts = "1.6.7"
 
 
 [libraries]
@@ -41,6 +42,7 @@ retrofit = {group = "com.squareup.retrofit2", name = "retrofit", version.ref =  
 retrofit-gson-converter = {group = "com.squareup.retrofit2", name = "converter-gson", version.ref =  "retrofit"}
 retrofit-coroutine-android = {group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "coroutines"}
 retrofit-coroutine-core = {group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "coroutines"}
+androidx-ui-text-google-fonts = { group = "androidx.compose.ui", name = "ui-text-google-fonts", version.ref = "uiTextGoogleFonts" }
 
 
 [plugins]

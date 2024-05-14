@@ -17,12 +17,13 @@ data class ContactInfoResponse(
 
 @Parcelize
 @Entity
-data class Contact(
-    val name: String?,
-    val phoneNumber: String?,
-    val email: String?,
-    @PrimaryKey val contactId: String = UUID.randomUUID().toString(),
-    val photo: ByteArray? = null
+data class  Contact(
+    var name: String? = "",
+    val lastName : String? = "",
+    var phoneNumber: String? = "",
+    var email: String? = "",
+    @PrimaryKey var contactId: String = UUID.randomUUID().toString(),
+    var photo: ByteArray? = null
 ) : Parcelable
 
 

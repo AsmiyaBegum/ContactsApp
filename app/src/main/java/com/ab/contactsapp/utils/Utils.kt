@@ -12,6 +12,11 @@ object Utils {
         val isConnected = connectivityManager.activeNetworkInfo?.isConnected
         return isConnected ?: false
     }
+    fun isEmailValid(email: String): Boolean {
+        val emailRegex = Regex("^\\S+@\\S+\\.\\S+\$")
+        return emailRegex.matches(email)
+    }
+
 }
 
 inline fun <reified T> List<T>.sortByCustomOrder(crossinline selector: (T) -> String): List<T> {
@@ -27,6 +32,7 @@ inline fun <reified T> List<T>.sortByCustomOrder(crossinline selector: (T) -> St
         selector(it)
     })
 }
+
 
 
 class ContactInfoArgType : JsonNavType<Contact>() {

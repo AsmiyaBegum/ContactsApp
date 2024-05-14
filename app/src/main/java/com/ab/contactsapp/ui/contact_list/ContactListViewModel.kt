@@ -14,8 +14,8 @@ import androidx.compose.runtime.remember
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.ab.contactsapp.contactHelper.contact
 import com.ab.contactsapp.contactHelper.getCallLogDetails
-import com.ab.contactsapp.contactHelper.getContacts
 import com.ab.contactsapp.contactHelper.markContactAsFavorite
 import com.ab.contactsapp.domain.contact.CallLogEntry
 import com.ab.contactsapp.domain.contact.CallLogGroup
@@ -29,6 +29,7 @@ import com.ab.contactsapp.utils.Constants
 import com.ab.contactsapp.utils.sortByCustomOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -114,10 +115,10 @@ class ContactListViewModel  @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ContactListState())
 
 
-    fun loadcontacts(contentResolver: ContentResolver){
+    fun loadcontacts(context: Context){
         viewModelScope.launch(Dispatchers.IO) {
             if(selectedTab.value == Constants.PHONE_CONTACTS){
-                savedStateHandle["contacts"] = getContacts(contentResolver = contentResolver).sortByCustomOrder { it.name?:"" }
+                savedStateHandle["contacts"] = contact(contentResolver = context.contentResolver)
             }else{
                 savedStateHandle["randomContacts"] = mockContacts.sortByCustomOrder { it.name?:"" }
             }
@@ -138,12 +139,6 @@ class ContactListViewModel  @Inject constructor(
         }
     }
 
-    fun getContactsFromAPI()  {
-//        call({
-//
-//        }, onSuccess = {
-//        })
-    }
 
     fun onToggleSearch() {
         savedStateHandle["isSearchActive"] = !isSearchActive.value

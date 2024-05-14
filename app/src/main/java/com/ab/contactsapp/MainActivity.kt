@@ -12,7 +12,6 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
 import com.ab.contactsapp.ui.contact_list.ContactListScreen
-import com.ab.contactsapp.ui.theme.ContactsAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import android.Manifest
 import android.app.Activity
@@ -22,10 +21,14 @@ import android.provider.Settings
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.MaterialTheme
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.ab.contactsapp.domain.contact.Contact
 import com.ab.contactsapp.domain.contact.Route
 import com.ab.contactsapp.permission.ReadContactPermissionTextProvider
 import com.ab.contactsapp.permission.PermissionDialog
@@ -34,7 +37,10 @@ import com.ab.contactsapp.ui.base.BaseViewModel
 import com.ab.contactsapp.ui.composables.SearchBar
 import com.ab.contactsapp.ui.contact_create.ContactCreateScreen
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
+import com.ab.contactsapp.utils.ContactInfoArgType
+import com.example.compose.AppTheme
 import com.google.accompanist.permissions.shouldShowRationale
+import com.google.gson.Gson
 
 
 const val PERMISSION_REQUEST_CODE = 101
@@ -53,7 +59,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            ContactsAppTheme {
+            AppTheme {
 //                val viewModel = viewModel<BaseViewModel>()
 //                val dialogQueue = viewModel.visiblePermissionDialogQueue
 //
@@ -153,12 +159,23 @@ class MainActivity : ComponentActivity() {
                         openAppSettings()
                     }
                 }
-                composable(route = Route.CONTACT_CREATE_SCREEN) {
-                    ContactCreateScreen()
+                composable(
+                    route = "${Route.CONTACT_CREATE_SCREEN}/{contact}",
+                    arguments = listOf(navArgument("contact"){
+                        type = ContactInfoArgType() })) { backStackEntry ->
+                    val contact = backStackEntry.arguments?.getString("contact")?.let { Gson().fromJson(it, Contact::class.java) }
+                    contact?.let {
+                        AppTheme {
+                            ContactCreateScreen(it,navController)
+                        }
+                    } ?: run {
+                        // Handle case when parameter is null
+                    }
+
                 }
 
                 composable(Route.CONTACT_DETAIL_SCREEN) {
-                    ContactDetailScreen(viewModel, onBackClicked = {
+                    ContactDetailScreen(navController,viewModel, onBackClicked = {
                         navController.navigate(Route.CONTACT_LIST_SCREEN) {
                             popUpTo(Route.CONTACT_DETAIL_SCREEN) {
                                 inclusive = true
@@ -168,6 +185,7 @@ class MainActivity : ComponentActivity() {
                     }) {
                     }
                 }
+
 
                 composable(Route.CONTACT_SEARCH_SCREEN){
                     SearchBar(

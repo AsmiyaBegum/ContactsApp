@@ -1,11 +1,6 @@
 package com.ab.contactsapp.ui.contact_list
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.pm.PackageManager
-import android.widget.Toast
-import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -15,7 +10,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -32,14 +26,10 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -54,40 +44,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.compose.ui.platform.LocalView
-import androidx.compose.ui.platform.LocalWindowInfo
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
-import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.navArgument
 import coil.compose.rememberAsyncImagePainter
-import coil.compose.rememberImagePainter
-import com.ab.contactsapp.MainActivity
-import com.ab.contactsapp.PERMISSION_REQUEST_CODE
-import com.ab.contactsapp.R
+import com.ab.contactsapp.WindowInfo
 import com.ab.contactsapp.domain.contact.Contact
 import com.ab.contactsapp.domain.contact.Route
-import com.ab.contactsapp.permission.PermissionDialog
-import com.ab.contactsapp.permission.ReadContactPermissionTextProvider
+import com.ab.contactsapp.rememberWindowInfo
 import com.ab.contactsapp.ui.composables.HideableSearchTextField
 import com.ab.contactsapp.ui.composables.RoundedCornerButton
 import com.ab.contactsapp.ui.composables.RoundedTabView
-import com.ab.contactsapp.ui.composables.SearchBar
+import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
 import com.ab.contactsapp.utils.Constants
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
 import com.google.gson.Gson
 import java.util.Locale
 
@@ -296,13 +272,13 @@ fun groupContacts(contacts: List<Contact>): Map<Char, List<Contact>> {
 }
 
 
-
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ContactListScreen(navController: NavController,viewModel: ContactListViewModel = hiltViewModel(),openAppSettings :() -> (Unit)) {
+fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel: ContactListViewModel = hiltViewModel(),openAppSettings :() -> (Unit)) {
     val readContactPermissionState = rememberPermissionState(Manifest.permission.READ_CONTACTS)
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
+    val windowInfo = rememberWindowInfo()
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -333,7 +309,7 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
     }
 
     Scaffold(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxWidth(),
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -356,32 +332,6 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
                 .fillMaxSize()
                 .padding(padding)
         ) {
-//            Row(
-//                verticalAlignment = Alignment.CenterVertically,
-//                horizontalArrangement = Arrangement.SpaceBetween,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(top = 16.dp)
-//            ) {
-//                Text(
-//                    text = "Contacts",
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 25.sp,
-//                    modifier = Modifier.padding(start = 16.dp, end = 8.dp)
-//                )
-//                Spacer(modifier = Modifier.weight(1f)) // This will push the search icon to the end
-//                IconButton(
-//                    onClick = {
-//                        navController.navigate(Route.CONTACT_SEARCH_SCREEN)
-//                    },
-//                    modifier = Modifier.padding(end = 16.dp)
-//                ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Search,
-//                        contentDescription = "Search"
-//                    )
-//                }
-//            }
 
             Box(
                 modifier = Modifier
@@ -433,7 +383,9 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
                 state,
                 onItemClick = { contact ->
                     viewModel.updateSelectedContact(contact)
-                    navController.navigate(Route.CONTACT_DETAIL_SCREEN)
+                  if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
+                      navController.navigate(Route.CONTACT_DETAIL_SCREEN)
+                  }
                 },
                 modifier = Modifier
                     .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
@@ -463,6 +415,27 @@ fun ContactListScreen(navController: NavController,viewModel: ContactListViewMod
             )
 
 
+        }
+    }
+}
+
+@Composable
+fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListViewModel, openAppSettings: () -> Unit){
+    val windowInfo = rememberWindowInfo()
+    if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
+        ContactListScreen(modifier = Modifier.fillMaxSize(), navController = navController,viewModel ) {
+            openAppSettings()
+        }
+    }else{
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            ContactListScreen(modifier = Modifier.weight(1f), navController = navController,viewModel) {
+                openAppSettings()
+            }
+            ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel, onBackClicked = { }) {
+
+            }
         }
     }
 }

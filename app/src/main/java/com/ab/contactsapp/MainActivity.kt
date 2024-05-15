@@ -36,6 +36,7 @@ import com.ab.contactsapp.permission.WriteContactPermissionTextProvider
 import com.ab.contactsapp.ui.base.BaseViewModel
 import com.ab.contactsapp.ui.composables.SearchBar
 import com.ab.contactsapp.ui.contact_create.ContactCreateScreen
+import com.ab.contactsapp.ui.contact_list.AdaptiveContactScreen
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
 import com.ab.contactsapp.utils.ContactInfoArgType
 import com.example.compose.AppTheme
@@ -155,7 +156,7 @@ class MainActivity : ComponentActivity() {
         Box {
             NavHost(navController = navController, startDestination = Route.CONTACT_LIST_SCREEN) {
                 composable(route = Route.CONTACT_LIST_SCREEN) {
-                    ContactListScreen(navController = navController, viewModel){
+                    AdaptiveContactScreen(navController = navController, viewModel){
                         openAppSettings()
                     }
                 }
@@ -175,7 +176,7 @@ class MainActivity : ComponentActivity() {
                 }
 
                 composable(Route.CONTACT_DETAIL_SCREEN) {
-                    ContactDetailScreen(navController,viewModel, onBackClicked = {
+                    ContactDetailScreen(modifier = Modifier.fillMaxSize(),navController,viewModel, onBackClicked = {
                         navController.navigate(Route.CONTACT_LIST_SCREEN) {
                             popUpTo(Route.CONTACT_DETAIL_SCREEN) {
                                 inclusive = true

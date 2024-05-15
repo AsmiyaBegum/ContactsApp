@@ -39,6 +39,7 @@ import com.ab.contactsapp.ui.contact_create.ContactCreateScreen
 import com.ab.contactsapp.ui.contact_detail.CallLogScreen
 import com.ab.contactsapp.ui.contact_list.AdaptiveContactScreen
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
+import com.ab.contactsapp.utils.Constants
 import com.ab.contactsapp.utils.ContactInfoArgType
 import com.example.compose.AppTheme
 import com.google.accompanist.permissions.shouldShowRationale
@@ -184,8 +185,16 @@ class MainActivity : ComponentActivity() {
                             }
                         }
 
-                    }) {
-                        navController.navigate(Route.CALL_LOG_SCREEN)
+                    }) { menu ->
+                        if(menu == Constants.CALL_LOGS){
+                            navController.navigate(Route.CALL_LOG_SCREEN)
+                        }else{
+                            navController.navigate(Route.CONTACT_LIST_SCREEN){
+                                popUpTo(Route.CONTACT_LIST_SCREEN) {
+                                    inclusive = true
+                                }
+                            }
+                        }
                     }
                 }
 

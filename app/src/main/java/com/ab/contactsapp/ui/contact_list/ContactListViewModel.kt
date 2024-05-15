@@ -165,6 +165,8 @@ class ContactListViewModel  @Inject constructor(
             // Delete the contact using the contact URI
             contentResolver.delete(contactUri, null, null)
         }
+        savedStateHandle["contacts"] = listOf<Contact>()
+        contactState.value = null
     }
 
 

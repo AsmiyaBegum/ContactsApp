@@ -23,7 +23,8 @@ data class  Contact(
     var phoneNumber: String? = "",
     var email: String? = "",
     @PrimaryKey var contactId: String = UUID.randomUUID().toString(),
-    var photo: ByteArray? = null
+    var photo: ByteArray? = null,
+    var isRandomContact : Boolean = false
 ) : Parcelable
 
 

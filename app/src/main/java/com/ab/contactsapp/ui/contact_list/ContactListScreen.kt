@@ -17,12 +17,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -102,9 +104,11 @@ fun ContactsScreen(
     }
 
 
-    Box(modifier = modifier) {
+    Box(modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
         if (state.selectedTab == Constants.PHONE_CONTACTS) {
-            ContactList(groupedContacts, listState, modifier, onItemClick = onItemClick)
+            ContactList(groupedContacts, listState,modifier, onItemClick = onItemClick)
         }else{
 //            RandomContactList(randomContacts)
         }
@@ -145,26 +149,42 @@ fun ContactList(
     modifier: Modifier,
     onItemClick: (Contact) -> Unit
 ) {
-    LazyColumn(
-        modifier = modifier,
-        state = scrollState,
-        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
-    ) {
-        groupedContacts.forEach { (group, contacts) ->
-            stickyHeader {
-                Text(
-                    text = group.toString(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.inverseOnSurface)
-                        .padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
-                )
-            }
-            items(contacts) { contact ->
-                ContactItem(contact, onItemClick)
+    if(groupedContacts.isEmpty()){
+        Box(
+            modifier = modifier.fillMaxSize(),
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(bottom = 30.dp)
+                    .align(Alignment.Center),
+                textAlign = TextAlign.Center,
+                text = "No contact found")
+        }
+
+
+    }else{
+        LazyColumn(
+            modifier = modifier,
+            state = scrollState,
+            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp)
+        ) {
+            groupedContacts.forEach { (group, contacts) ->
+                stickyHeader {
+                    Text(
+                        text = group.toString(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(MaterialTheme.colorScheme.inverseOnSurface)
+                            .padding(start = 16.dp, top = 4.dp, bottom = 4.dp)
+                    )
+                }
+                items(contacts) { contact ->
+                    ContactItem(contact, onItemClick)
+                }
             }
         }
     }
+
 }
 
 
@@ -399,8 +419,10 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                     .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
             )
 
+
             Column(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
                     .weight(1f)
                     .align(Alignment.CenterHorizontally)
                     .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
@@ -449,8 +471,16 @@ fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListVie
             ContactListScreen(modifier = Modifier.weight(1f), navController = navController,viewModel) {
                 openAppSettings()
             }
-            ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel, onBackClicked = { }) {
-                navController.navigate(Route.CALL_LOG_SCREEN)
+            ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel,
+                onBackClicked = {
+
+                }
+            ) { menu ->
+                if(menu == Constants.CALL_LOGS){
+                    navController.navigate(Route.CALL_LOG_SCREEN)
+                }else{
+                    navController.navigate(Route.CONTACT_DETAIL_SCREEN)
+                }
             }
         }
     }

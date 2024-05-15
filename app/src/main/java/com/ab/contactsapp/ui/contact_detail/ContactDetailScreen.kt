@@ -15,7 +15,9 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -42,6 +44,7 @@ import com.ab.contactsapp.utils.Constants
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -66,14 +69,12 @@ fun ContactDetailScreen(
     navController: NavController,
     viewModel: ContactListViewModel = hiltViewModel(),
     onBackClicked: () -> Unit,
-    onMenuClicked: () -> Unit
+    onMenuClicked: (String) -> Unit
 ) {
     val context = LocalContext.current
     var contact by remember { viewModel.contactState }
     val windowType =  rememberWindowInfo()
-    var showDropDown by remember {
-        mutableStateOf(false)
-    }
+
     val writeContactPermissionState = rememberPermissionState(permission = Manifest.permission.WRITE_CONTACTS)
 
     val writePermissionLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
@@ -85,9 +86,24 @@ fun ContactDetailScreen(
     }
 
     Scaffold(
-        modifier = modifier.fillMaxWidth()){ padding->
-        if(contact == null){
-            Text(text = "Select contact to show detail")
+        modifier = modifier.fillMaxWidth()
+    ){ padding->
+        if(contact?.name.isNullOrBlank() && contact?.phoneNumber.isNullOrBlank()){
+           Row( modifier = Modifier
+               .fillMaxSize()
+               .padding(padding),
+               verticalAlignment = Alignment.CenterVertically,
+               horizontalArrangement = Arrangement.Center
+           ) {
+               Text(
+                   modifier = Modifier
+                       .weight(1f),
+                   textAlign = TextAlign.Center,
+                   color = MaterialTheme.colorScheme.onSurface,
+                   text = "Select contact to show detail"
+               )
+           }
+
         }else{
             ConstraintLayout(
                 modifier = Modifier
@@ -151,15 +167,15 @@ fun ContactDetailScreen(
 
                 DropDownMenu(
                     modifier = Modifier
+                        .visible(!contact!!.isRandomContact)
                         .constrainAs(menuButton) {
                             top.linkTo(parent.top, margin = 16.dp)
                             end.linkTo(parent.end, margin = 16.dp)
                         },
-                    showDropDown = showDropDown,
                     items = Constants.OPTION_MENU_LIST
                 ) { menu ->
                     when(menu){
-                        Constants.CALL_LOGS -> onMenuClicked
+                        Constants.CALL_LOGS -> onMenuClicked(Constants.CALL_LOGS)
                         else -> {
                             if(!writeContactPermissionState.status.isGranted){
                                 writePermissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
@@ -168,13 +184,13 @@ fun ContactDetailScreen(
                                     viewModel.markContactAsFav(context.contentResolver, contactId = contact!!.contactId.toLong())
                                 }else{
                                     viewModel.deleteContact(context.contentResolver,contact!!.contactId.toLong())
+                                    onMenuClicked(Constants.DELETE)
                                 }
                             }
 
                         }
 
                     }
-                    showDropDown = false
                 }
 
 
@@ -239,7 +255,7 @@ fun ContactDetailScreen(
 
 
 
-            } 
+            }
         }
     }
 
@@ -383,7 +399,7 @@ fun SocialMediaAndRecentList(modifier: Modifier, isSocialMediaTab : Boolean,cont
             if(calls.size > 1 && Utils.isCompact(windowInfo)){
                 calls = calls.take(2)
             }
-           CallLogList(callLogGroups)
+           CallLogList(calls)
         }
 
 

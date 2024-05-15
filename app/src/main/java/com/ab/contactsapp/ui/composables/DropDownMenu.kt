@@ -28,15 +28,15 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import kotlin.math.exp
 
 @Composable
 fun DropDownMenu(
     modifier: Modifier = Modifier,
     items: List<String>,
-    showDropDown : Boolean,
     onItemClick : (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(showDropDown) }
+    var expanded by remember { mutableStateOf(false) }
 
     Box(
         modifier = modifier.fillMaxWidth()
@@ -58,6 +58,7 @@ fun DropDownMenu(
                     text = { Text(it) },
                     onClick = {
                         onItemClick(it)
+                        expanded = false
                     }
                 )
             }

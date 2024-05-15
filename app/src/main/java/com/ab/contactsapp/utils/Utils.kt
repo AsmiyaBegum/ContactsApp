@@ -3,6 +3,7 @@ package com.ab.contactsapp.utils
 import android.content.Context
 import android.net.ConnectivityManager
 import com.ab.contactsapp.WindowInfo
+import com.ab.contactsapp.domain.contact.CallLogEntry
 import com.ab.contactsapp.domain.contact.Contact
 import com.google.gson.Gson
 
@@ -24,6 +25,14 @@ object Utils {
 
     fun isCompact(windowInfo: WindowInfo) : Boolean{
         return windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact
+    }
+
+    fun getCallTypeAndDuration(entry: CallLogEntry) : String{
+        return if(entry.type.toLowerCase() == "missed"){
+            "(${entry.type})"
+        }else{
+            "(${entry.type} - ${entry.duration / 60} min ${entry.duration % 60} sec)"
+        }
     }
 }
 

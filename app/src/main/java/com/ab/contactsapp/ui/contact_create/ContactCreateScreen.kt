@@ -1,6 +1,7 @@
 package com.ab.contactsapp.ui.contact_create
 
 import android.Manifest
+import android.content.Context
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -16,8 +17,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Icon
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,6 +49,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
@@ -57,6 +62,7 @@ import com.ab.contactsapp.R
 import com.ab.contactsapp.contactHelper.uriToByteArray
 import com.ab.contactsapp.domain.contact.Contact
 import com.ab.contactsapp.ui.composables.OutlinedTextFieldWithIcon
+import com.ab.contactsapp.ui.composables.RoundedBorderIcon
 import com.ab.contactsapp.ui.composables.RoundedCornerButton
 import com.ab.contactsapp.ui.contact_list.visible
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -98,85 +104,92 @@ fun ContactCreateScreen(contact: Contact?,navController : NavController, viewMod
     Scaffold(
         modifier = Modifier.fillMaxSize()
     ) { padding ->
-        Box(
-            modifier = Modifier.fillMaxSize()
+        Column(
+            modifier = Modifier
                 .padding(padding)
-        ){
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.Top
-            ) {
-                // Back button
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back",
-                    modifier = Modifier
-                        .align(Alignment.Start)
-                        .padding(16.dp)
-                )
-
-
-                // "Add Contact" text
-                Text(
-                    text = "Add Contact",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 25.sp,
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-
-                // Centered round box for image
-                Box(
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
-                        .size(200.dp)
-                        .clip(CircleShape)
-                        .clickable {
-                            pickImageLauncher.launch("image/*")
-                        }
+                .verticalScroll(rememberScrollState())
+        ) {
+            Box(
+                modifier = Modifier.fillMaxSize()
+            ){
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalArrangement = Arrangement.Top
                 ) {
-
-                    Image(
-                        painter,
-                        contentDescription = null,
+                    // Back button
+                    RoundedBorderIcon(
+                        icon = R.drawable.ic_arrow_back,
                         modifier = Modifier
-                            .matchParentSize()
-                            .background(MaterialTheme.colorScheme.secondaryContainer)
-                            .align(Alignment.Center),
-                        contentScale = ContentScale.Crop
+                            .align(Alignment.Start)
+                            .padding(16.dp)
+                    ){
+                        navController.popBackStack()
+                    }
+
+
+                    // "Add Contact" text
+                    Text(
+                        text = "Add Contact",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 25.sp,
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .align(Alignment.CenterHorizontally)
                     )
 
+                    // Centered round box for image
                     Box(
                         modifier = Modifier
-                            .size(80.dp)
-                            .align(Alignment.BottomEnd)
-                            .padding(8.dp)
+                            .align(Alignment.CenterHorizontally)
+                            .size(200.dp)
+                            .clip(CircleShape)
+                            .clickable {
+                                pickImageLauncher.launch("image/*")
+                            }
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = "Add photo",
-                            tint = MaterialTheme.colorScheme.onSecondary,
+
+                        Image(
+                            painter,
+                            contentDescription = null,
                             modifier = Modifier
-                                .size(120.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    MaterialTheme.colorScheme.secondary
-                                )
-                                // Align the add icon's center to the center of the rounded box
-                                .align(Alignment.Center)
+                                .matchParentSize()
+                                .background(MaterialTheme.colorScheme.secondaryContainer)
+                                .align(Alignment.Center),
+                            contentScale = ContentScale.Crop
                         )
+
+                        Box(
+                            modifier = Modifier
+                                .size(80.dp)
+                                .align(Alignment.BottomEnd)
+                                .padding(8.dp)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add photo",
+                                tint = MaterialTheme.colorScheme.onSecondary,
+                                modifier = Modifier
+                                    .size(120.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        MaterialTheme.colorScheme.secondary
+                                    )
+                                    // Align the add icon's center to the center of the rounded box
+                                    .align(Alignment.Center)
+                            )
+                        }
+
                     }
+
+                    CreateOrEditContact(navController = navController, viewModel = viewModel,permissionState.status.isGranted)
+
 
                 }
 
-                CreateOrEditContact(navController = navController, viewModel = viewModel,permissionState.status.isGranted)
-
 
             }
-
-
         }
+
     }
 
 }
@@ -215,14 +228,17 @@ fun CreateOrEditContact(navController : NavController, viewModel: ContactCreatio
           text = stringResource(id = R.string.phone),
           imageVector = Icons.Default.Phone,
           onValueChanged = viewModel::onPhoneNumberChanged,
-          fieldValue = state.phone
+          fieldValue = state.phone,
+          keyboardOptions =  KeyboardOptions.Default.copy(
+              keyboardType = KeyboardType.Number
+          )
       )
       OutlinedTextFieldWithIcon(
           modifier = Modifier.padding(16.dp),
           text = stringResource(id = R.string.email),
           imageVector = Icons.Default.Email,
           onValueChanged = viewModel::onEmailChanged,
-          fieldValue = state.email
+          fieldValue = state.email,
       )
 
       Spacer(modifier = Modifier.weight(1f))
@@ -235,7 +251,9 @@ fun CreateOrEditContact(navController : NavController, viewModel: ContactCreatio
           .align(Alignment.CenterHorizontally),
       onClick = {
           if(isAllowed){
-              viewModel.saveContact(context = context)
+             checkFields(state,context){
+                 viewModel.saveContact(context = context)
+             }
           }else{
               Toast.makeText(context, "Kindly provide write contact permission in app settings",Toast.LENGTH_SHORT).show()
           }
@@ -244,4 +262,26 @@ fun CreateOrEditContact(navController : NavController, viewModel: ContactCreatio
 
       )
   }
+}
+
+fun checkFields(
+    state: CreateContactState,
+    context: Context,
+    saveContact : () -> (Unit)
+) {
+    if ((state.firstName.isNotEmpty() || state.lastName.isNotEmpty()) && state.phone.isNotEmpty() ) {
+        if (state.email.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
+            Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show()
+        }else{
+            saveContact()
+        }
+    } else {
+        if(state.firstName.isBlank() && state.lastName.isBlank()){
+            Toast.makeText(context, "Kindly provide name to continue", Toast.LENGTH_SHORT).show()
+        }else if(state.phone.isBlank()){
+            Toast.makeText(context, "Kindly provide phone number to continue", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+
 }

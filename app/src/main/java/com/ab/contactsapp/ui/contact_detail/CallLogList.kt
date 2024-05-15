@@ -65,13 +65,13 @@ fun CallLogList(calls : List<CallLogGroup>){
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = 10.dp)
+                        .padding(start = 10.dp,top = 8.dp)
                 ) {
                     group.callLogs.forEach { entry ->
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 8.dp),
+                                .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically) {
                             // Display call icon based on call type
                             val icon = when (entry.type) {
@@ -95,7 +95,7 @@ fun CallLogList(calls : List<CallLogGroup>){
                             // Display call type and duration
                             Text(
                                 fontSize = 12.sp,
-                                text = "(${entry.type} - ${entry.duration / 60} min ${entry.duration % 60} sec)",
+                                text = Utils.getCallTypeAndDuration(entry),
                                 modifier = Modifier.weight(1f)
                             )
                         }

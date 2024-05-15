@@ -3,6 +3,7 @@ package com.ab.contactsapp.ui.composables
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -12,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ab.contactsapp.ui.contact_list.visible
 
@@ -23,14 +25,14 @@ fun OutlinedTextFieldWithIcon(
     text: String,
     imageVector: ImageVector?,
     onValueChanged : (String) -> Unit,
-    fieldValue : String
+    fieldValue : String,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
 ){
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Icon for person
-//        if(showIcon){
             Icon(
                 imageVector = imageVector!!,
                 contentDescription = text,
@@ -38,7 +40,6 @@ fun OutlinedTextFieldWithIcon(
                 modifier = Modifier.padding(end = 14.dp)
                     .visible(showIcon)
             )
-//        }
 
         // Outlined text field for first name
         OutlinedTextField(
@@ -50,7 +51,9 @@ fun OutlinedTextFieldWithIcon(
             placeholder = {
                 Text(text = text)
             },
-            modifier = Modifier.fillMaxWidth() // Expand to fill available space
+            modifier = Modifier.fillMaxWidth(),
+            keyboardOptions = keyboardOptions,
+            singleLine = true
         )
     }
 }

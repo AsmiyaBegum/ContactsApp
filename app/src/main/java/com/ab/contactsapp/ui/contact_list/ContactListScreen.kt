@@ -374,7 +374,7 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(90.dp)
-                        .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
+                        .visible((readContactPermissionState.status.isGranted && selectedTabIndex == 0))
                 )
 
                 this@Column.AnimatedVisibility(

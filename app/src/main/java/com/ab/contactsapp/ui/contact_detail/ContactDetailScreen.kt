@@ -5,6 +5,7 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -48,6 +49,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.domain.contact.Contact
 import com.ab.contactsapp.domain.contact.Route
 import com.ab.contactsapp.rememberWindowInfo
+import com.ab.contactsapp.ui.composables.DropDownMenu
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
 import com.ab.contactsapp.ui.contact_list.visible
 import com.ab.contactsapp.utils.Utils
@@ -57,6 +59,7 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.gson.Gson
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ContactDetailScreen(
     modifier: Modifier,
@@ -65,8 +68,22 @@ fun ContactDetailScreen(
     onBackClicked: () -> Unit,
     onMenuClicked: () -> Unit
 ) {
+    val context = LocalContext.current
     var contact by remember { viewModel.contactState }
     val windowType =  rememberWindowInfo()
+    var showDropDown by remember {
+        mutableStateOf(false)
+    }
+    val writeContactPermissionState = rememberPermissionState(permission = Manifest.permission.WRITE_CONTACTS)
+
+    val writePermissionLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted){
+
+        }else{
+            Toast.makeText(context, "Kindly provide permission for write contact to perform operations", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     Scaffold(
         modifier = modifier.fillMaxWidth()){ padding->
         if(contact == null){
@@ -132,20 +149,34 @@ fun ContactDetailScreen(
                     }
                 }
 
-                IconButton(
-                    onClick = onMenuClicked,
+                DropDownMenu(
                     modifier = Modifier
                         .constrainAs(menuButton) {
                             top.linkTo(parent.top, margin = 16.dp)
                             end.linkTo(parent.end, margin = 16.dp)
+                        },
+                    showDropDown = showDropDown,
+                    items = Constants.OPTION_MENU_LIST
+                ) { menu ->
+                    when(menu){
+                        Constants.CALL_LOGS -> onMenuClicked
+                        else -> {
+                            if(!writeContactPermissionState.status.isGranted){
+                                writePermissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
+                            }else{
+                                if(menu == Constants.MARK_AS_FAV){
+                                    viewModel.markContactAsFav(context.contentResolver, contactId = contact!!.contactId.toLong())
+                                }else{
+                                    viewModel.deleteContact(context.contentResolver,contact!!.contactId.toLong())
+                                }
+                            }
+
                         }
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.option_menu_icon), // your menu icon
-                        tint = androidx.compose.material3.MaterialTheme.colorScheme.onSurface,
-                        contentDescription = "Menu"
-                    )
+
+                    }
+                    showDropDown = false
                 }
+
 
                 Text(
                     text = contact?.name?:"", // contact name
@@ -210,7 +241,6 @@ fun ContactDetailScreen(
 
             } 
         }
-       
     }
 
 }

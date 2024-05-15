@@ -149,18 +149,22 @@ class ContactListViewModel  @Inject constructor(
     }
 
     fun markContactAsFav(contentResolver: ContentResolver,contactId: Long){
-        markContactAsFavorite(contentResolver, contactId = contactId)
+        viewModelScope.launch(Dispatchers.IO) {
+            markContactAsFavorite(contentResolver, contactId = contactId)
+        }
     }
 
 
+
     fun deleteContact(contentResolver: ContentResolver, contactId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Specify the contact URI
+            val contactUri: Uri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
+                .appendPath(contactId.toString()).build()
 
-        // Specify the contact URI
-        val contactUri: Uri = ContactsContract.Contacts.CONTENT_URI.buildUpon()
-            .appendPath(contactId.toString()).build()
-
-        // Delete the contact using the contact URI
-        contentResolver.delete(contactUri, null, null)
+            // Delete the contact using the contact URI
+            contentResolver.delete(contactUri, null, null)
+        }
     }
 
 

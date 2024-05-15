@@ -10,6 +10,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,6 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -312,6 +314,8 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
         modifier = modifier.fillMaxWidth(),
         floatingActionButton = {
             FloatingActionButton(
+                modifier = Modifier
+                    .visible(selectedTabIndex == 0 && readContactPermissionState.status.isGranted),
                 onClick = {
 //                    requestPermission(Manifest.permission.WRITE_CONTACTS)
                     navController.navigate("${Route.CONTACT_CREATE_SCREEN}/${Gson().toJson(Contact())}"){
@@ -392,28 +396,36 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                     .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
             )
 
-            Text(
-                text = "Kindly provide permission to read contacts",
-                fontWeight = FontWeight.Medium,
-                fontSize = 15.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1))
-            )
-
-            RoundedCornerButton(
-                buttonText = "Add",
-                modifier = Modifier
+            Column(
+                modifier = Modifier.fillMaxWidth()
+                    .weight(1f)
                     .align(Alignment.CenterHorizontally)
                     .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
-                onClick = {
-                    openAppSettings()
-                },
-                buttonColor = MaterialTheme.colorScheme.secondary,
-                buttonContentColor = MaterialTheme.colorScheme.onSecondary
-            )
+                verticalArrangement = Arrangement.Center,
+            ){
+                Text(
+                    text = "Kindly provide permission to read contacts",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+
+                RoundedCornerButton(
+                    buttonText = "Add",
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    onClick = {
+                        openAppSettings()
+                    },
+                    buttonColor = MaterialTheme.colorScheme.secondary,
+                    buttonContentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            }
+
+
 
 
         }

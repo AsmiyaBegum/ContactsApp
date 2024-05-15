@@ -2,6 +2,7 @@ package com.ab.contactsapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
+import com.ab.contactsapp.WindowInfo
 import com.ab.contactsapp.domain.contact.Contact
 import com.google.gson.Gson
 
@@ -17,6 +18,13 @@ object Utils {
         return emailRegex.matches(email)
     }
 
+    fun isCompactOrMedium(windowInfo: WindowInfo) : Boolean{
+       return windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium
+    }
+
+    fun isCompact(windowInfo: WindowInfo) : Boolean{
+        return windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact
+    }
 }
 
 inline fun <reified T> List<T>.sortByCustomOrder(crossinline selector: (T) -> String): List<T> {

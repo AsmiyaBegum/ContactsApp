@@ -36,6 +36,7 @@ import com.ab.contactsapp.permission.WriteContactPermissionTextProvider
 import com.ab.contactsapp.ui.base.BaseViewModel
 import com.ab.contactsapp.ui.composables.SearchBar
 import com.ab.contactsapp.ui.contact_create.ContactCreateScreen
+import com.ab.contactsapp.ui.contact_detail.CallLogScreen
 import com.ab.contactsapp.ui.contact_list.AdaptiveContactScreen
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
 import com.ab.contactsapp.utils.ContactInfoArgType
@@ -184,6 +185,7 @@ class MainActivity : ComponentActivity() {
                         }
 
                     }) {
+                        navController.navigate(Route.CALL_LOG_SCREEN)
                     }
                 }
 
@@ -192,6 +194,10 @@ class MainActivity : ComponentActivity() {
                     SearchBar(
                        viewModel
                     )
+                }
+
+                composable(Route.CALL_LOG_SCREEN){
+                    CallLogScreen(navController,viewModel )
                 }
             }
 

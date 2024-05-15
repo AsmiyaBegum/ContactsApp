@@ -11,10 +11,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,28 +38,23 @@ import com.ab.contactsapp.domain.contact.SocialMedia
 import com.ab.contactsapp.ui.composables.RoundedBorderIcon
 import com.ab.contactsapp.ui.composables.RoundedTabView
 import com.ab.contactsapp.utils.Constants
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Call
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.domain.contact.Contact
 import com.ab.contactsapp.domain.contact.Route
+import com.ab.contactsapp.rememberWindowInfo
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
+import com.ab.contactsapp.ui.contact_list.visible
+import com.ab.contactsapp.utils.Utils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.gson.Gson
-import java.text.DateFormat
-import java.text.SimpleDateFormat
-import java.util.Date
 
 
 @Composable
@@ -71,6 +66,7 @@ fun ContactDetailScreen(
     onMenuClicked: () -> Unit
 ) {
     var contact by remember { viewModel.contactState }
+    val windowType =  rememberWindowInfo()
     Scaffold(
         modifier = modifier.fillMaxWidth()){ padding->
         if(contact == null){
@@ -127,6 +123,7 @@ fun ContactDetailScreen(
                             top.linkTo(parent.top, margin = 16.dp)
                             start.linkTo(parent.start, margin = 16.dp)
                         }
+                        .visible(Utils.isCompactOrMedium(windowType))
                 ) {
                     RoundedBorderIcon(
                         R.drawable.ic_arrow_back,
@@ -189,7 +186,7 @@ fun ContactDetailScreen(
                             width = Dimension.fillToConstraints
                         },
                     contact = contact!!,
-                    navController
+                    viewModel
                 )
 
                 Box(modifier = Modifier
@@ -221,9 +218,10 @@ fun ContactDetailScreen(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ContactActionsRow(modifier: Modifier, contact: Contact,navController: NavController) {
+fun ContactActionsRow(modifier: Modifier, contact: Contact,viewModel: ContactListViewModel) {
     val context = LocalContext.current
     val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
+
 
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -247,9 +245,6 @@ fun ContactActionsRow(modifier: Modifier, contact: Contact,navController: NavCon
             modifier = Modifier.fillMaxSize()
         ) {
             RoundedBorderIcon( R.drawable.ic_share ) {
-                navController.navigate("${Route.CONTACT_CREATE_SCREEN}/${Gson().toJson(contact)}"){
-                    launchSingleTop = true
-                }
 //                shareContact(context, contact = contact)
             }
 
@@ -286,6 +281,7 @@ fun SocialMediaAndRecentTab(modifier: Modifier = Modifier,contact: Contact,viewM
             },
             tabs = listOf(Constants.SOCIAL_MEDIA,Constants.RECENTS),
             modifier = Modifier
+                .padding(start = 16.dp, end = 16.dp)
                 .align(Alignment.CenterHorizontally)
         )
         
@@ -306,6 +302,7 @@ fun SocialMediaAndRecentTab(modifier: Modifier = Modifier,contact: Contact,viewM
 @Composable
 fun SocialMediaAndRecentList(modifier: Modifier, isSocialMediaTab : Boolean,contact: Contact,viewModel: ContactListViewModel){
     val context = LocalContext.current
+    val windowInfo =  rememberWindowInfo()
     val callLogGroups by viewModel.callLogEntries.collectAsState(initial = listOf())
     val callLogPermissionState = rememberPermissionState(permission = Manifest.permission.READ_CALL_LOG)
     val requestPermissionLauncher = rememberLauncherForActivityResult(
@@ -352,62 +349,11 @@ fun SocialMediaAndRecentList(modifier: Modifier, isSocialMediaTab : Boolean,cont
             exit = fadeOut(),
             modifier = Modifier.fillMaxWidth()
         ) {
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-//                Text(
-//                    textAlign = TextAlign.Center,
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .padding(top = 25.dp),
-//                    text = "No Recent Calls"
-//                )
-
-                LazyColumn {
-
-                    var calls = callLogGroups
-                    if(calls.size > 1){
-                        calls = calls.take(1)
-                    }
-                    items(calls) { group ->
-                        Text(
-                            text = DateFormat.getDateInstance().format(Date(group.date)),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            modifier = Modifier.padding(vertical = 8.dp)
-                        )
-
-                        Column {
-                            group.callLogs.forEach { entry ->
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    // Display call icon based on call type
-                                    val icon = when (entry.type) {
-                                        "Incoming" -> Icons.Default.Call
-                                        "Outgoing" -> Icons.Default.Call
-                                        "Missed" -> Icons.Default.Call
-                                        else -> Icons.Default.Call
-                                    }
-                                    Icon(icon, contentDescription = null)
-                                    Spacer(Modifier.width(8.dp))
-                                    // Display call time
-                                    Text(
-                                        text = SimpleDateFormat.getTimeInstance().format(Date(entry.date)),
-                                        modifier = Modifier.width(100.dp)
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    // Display call type and duration
-                                    Text(
-                                        text = "${entry.type} - ${entry.duration / 60} min ${entry.duration % 60} sec",
-                                        modifier = Modifier.weight(1f)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
+            var calls = callLogGroups
+            if(calls.size > 1 && Utils.isCompact(windowInfo)){
+                calls = calls.take(2)
             }
+           CallLogList(callLogGroups)
         }
 
 
@@ -439,19 +385,32 @@ fun SocialMediaListItem(platform : String, link : String?){
             modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(top = 8.dp, bottom = 8.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.inverseOnSurface),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
         ) {
-            Icon(painter = painterResource(id = R.drawable.ic_message), contentDescription = "platform image")
-            Spacer(modifier = Modifier.width(16.dp))
+            RoundedBorderIcon(
+                modifier = Modifier.padding(vertical = 10.dp),
+                icon = if(platform == "Email"){
+                    R.drawable.ic_email
+                }else{
+                    R.drawable.ic_message
+                },
+                onClick = {}
+            )
+            Spacer(modifier = Modifier.width(8.dp))
             Text(
+                modifier = Modifier.padding(8.dp),
                 text = link?:"",
                 style = MaterialTheme.typography.bodyMedium,
             )
         }
-        Divider(modifier = Modifier.padding(5.dp))
     }
 }
+
+
 
 
 private fun shareContact(context: Context, contact: Contact) {

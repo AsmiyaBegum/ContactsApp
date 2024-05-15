@@ -23,10 +23,11 @@ fun RoundedBorderIcon(
     icon: Int,
     iconBg : Color = MaterialTheme.colorScheme.secondaryContainer,
     iconTint : Color  = MaterialTheme.colorScheme.onSecondaryContainer,
-    onClick: () -> Unit
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit,
 ) {
     Box(
-        modifier = Modifier
+        modifier = modifier
             .size(48.dp)
             .background(color = iconBg, shape = CircleShape)
             .clickable(onClick = onClick),

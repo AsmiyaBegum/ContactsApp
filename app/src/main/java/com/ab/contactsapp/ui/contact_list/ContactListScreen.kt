@@ -435,7 +435,7 @@ fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListVie
                 openAppSettings()
             }
             ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel, onBackClicked = { }) {
-
+                navController.navigate(Route.CALL_LOG_SCREEN)
             }
         }
     }

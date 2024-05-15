@@ -374,8 +374,9 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                 },
                 tabs = listOf(Constants.PHONE_CONTACTS, Constants.RANDOM_CONTACTS),
                 modifier = Modifier
-                    .fillMaxWidth()
+//                    .fillMaxWidth()
                     .padding(16.dp)
+                    .align(Alignment.CenterHorizontally)
             )
 
 

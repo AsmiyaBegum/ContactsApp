@@ -1,6 +1,7 @@
 package com.ab.contactsapp.ui.contact_list
 
 import android.Manifest
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
@@ -29,6 +30,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +55,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.WindowInfo
 import com.ab.contactsapp.domain.contact.Contact
@@ -71,6 +75,7 @@ import java.util.Locale
 
 @Composable
 fun ContactsScreen(
+    viewModel: ContactListViewModel,
     state: ContactListState,
     onItemClick: (Contact) -> Unit,
     modifier: Modifier
@@ -83,6 +88,8 @@ fun ContactsScreen(
     val groupedContacts = groupContacts(contacts)
     var targetGroup by remember { mutableStateOf<Pair<Char, Int>?>(null) }
     val listState = rememberLazyListState()
+//    val randomContacts = viewModel.getBreakingNews().collectAsLazyPagingItems()
+
 
     LaunchedEffect(targetGroup) {
         // Find the index of the first contact in the target group
@@ -93,18 +100,12 @@ fun ContactsScreen(
         }
     }
 
+
     Box(modifier = modifier) {
-        ContactList(groupedContacts, listState, modifier, onItemClick = onItemClick)
         if (state.selectedTab == Constants.PHONE_CONTACTS) {
-//            AToZList(
-//                groups = Constants.A_Z_LIST,
-//                modifier = Modifier
-//                    .align(Alignment.TopEnd)
-//                    .padding(end = 8.dp),
-//                targetGroup = { group, index ->
-//                    targetGroup = Pair(group, index)
-//                }
-//            )
+            ContactList(groupedContacts, listState, modifier, onItemClick = onItemClick)
+        }else{
+//            RandomContactList(randomContacts)
         }
     }
 }
@@ -448,6 +449,51 @@ fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListVie
             }
             ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel, onBackClicked = { }) {
                 navController.navigate(Route.CALL_LOG_SCREEN)
+            }
+        }
+    }
+}
+
+@Composable
+fun RandomContactList(
+    beers: LazyPagingItems<Contact>
+) {
+    val context = LocalContext.current
+    LaunchedEffect(key1 = beers.loadState) {
+        if(beers.loadState.refresh is LoadState.Error) {
+            Toast.makeText(
+                context,
+                "Error: " + (beers.loadState.refresh as LoadState.Error).error.message,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        if(beers.loadState.refresh is LoadState.Loading) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center)
+            )
+        } else {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                items(beers) { beer ->
+                    if(beer != null) {
+                        ContactItem(
+                            contact = beer
+                        ){
+
+                        }
+                    }
+                }
+                item {
+                    if(beers.loadState.append is LoadState.Loading) {
+                        CircularProgressIndicator()
+                    }
+                }
             }
         }
     }

@@ -57,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.items
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.WindowInfo
 import com.ab.contactsapp.domain.contact.Contact
@@ -386,6 +387,7 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
 
 
             ContactsScreen(
+                viewModel,
                 state,
                 onItemClick = { contact ->
                     viewModel.updateSelectedContact(contact)

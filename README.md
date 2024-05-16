@@ -70,5 +70,6 @@ The Contact Application is an Android native app that allows users to manage the
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.30%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.29%20PM%20(2).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.30%20PM%20(1).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<br>
+
+
 **Dark Theme** :

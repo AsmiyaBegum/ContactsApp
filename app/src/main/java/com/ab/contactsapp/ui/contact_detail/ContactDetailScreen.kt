@@ -44,6 +44,7 @@ import com.ab.contactsapp.utils.Constants
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -128,6 +129,11 @@ fun ContactDetailScreen(
                                     }
                                     .clip(RoundedCornerShape(25))
                                 ,
+                                colorFilter = if(contact?.photo==null && contact?.photoUrl == null){
+                                    ColorFilter.tint(MaterialTheme.colorScheme.onSurface)
+                                }else{
+                                    null
+                                },
                                 contentScale = ContentScale.Crop
                             )
 

@@ -107,7 +107,7 @@ class MainActivity : ComponentActivity() {
 
 
                 composable(Route.CALL_LOG_SCREEN){
-                    CallLogScreen(navController,viewModel )
+                        CallLogScreen(navController,viewModel )
                 }
             }
 

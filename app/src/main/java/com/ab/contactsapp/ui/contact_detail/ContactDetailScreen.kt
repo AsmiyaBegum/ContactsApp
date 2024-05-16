@@ -53,8 +53,8 @@ import com.ab.contactsapp.utils.Route
 import com.ab.contactsapp.rememberWindowInfo
 import com.ab.contactsapp.ui.composables.DropDownMenu
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
-import com.ab.contactsapp.ui.contact_list.visible
 import com.ab.contactsapp.utils.Utils
+import com.ab.contactsapp.utils.visible
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -71,18 +71,18 @@ fun ContactDetailScreen(
     onMenuClicked: (String) -> Unit
 ) {
     val context = LocalContext.current
-    var contact by remember { viewModel.contactState }
+    val contact by remember { viewModel.contactState }
     val windowType =  rememberWindowInfo()
 
     val writeContactPermissionState = rememberPermissionState(permission = Manifest.permission.WRITE_CONTACTS)
 
     val writePermissionLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { granted ->
-        if (granted){
-
-        }else{
-            Toast.makeText(context, "Kindly provide permission for write contact to perform operations", Toast.LENGTH_SHORT).show()
+        if (!granted){
+            Toast.makeText(context, context.resources.getString(R.string.write_permission), Toast.LENGTH_SHORT).show()
         }
     }
+
+    // Detail UI
 
 
     Scaffold(
@@ -100,7 +100,7 @@ fun ContactDetailScreen(
                        .weight(1f),
                    textAlign = TextAlign.Center,
                    color = MaterialTheme.colorScheme.onSurface,
-                   text = "Select contact to show detail"
+                   text = context.resources.getString(R.string.select_contacts_to_display)
                )
            }
 
@@ -175,7 +175,7 @@ fun ContactDetailScreen(
                                         }else{
                                             if(menu == Constants.MARK_AS_FAV){
                                                 viewModel.markContactAsFav(context.contentResolver, contactId = contact!!.contactId.toLong())
-                                                Toast.makeText(context, "Contact Marked as Favorite",Toast.LENGTH_SHORT).show()
+                                                Toast.makeText(context, context.resources.getString(R.string.contact_fav),Toast.LENGTH_SHORT).show()
                                             }else{
                                                 viewModel.deleteContact(context.contentResolver,contact!!.contactId.toLong())
                                                 onMenuClicked(Constants.DELETE)
@@ -266,10 +266,8 @@ fun ContactActionsRow(modifier: Modifier, contact: Contact, viewModel: ContactLi
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            // Permission granted
-        } else {
-            // Handle permission denial
+        if (!isGranted) {
+            Toast.makeText(context, context.resources.getString(R.string.call_permission), Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -348,10 +346,8 @@ fun SocialMediaAndRecentList(modifier: Modifier, isSocialMediaTab : Boolean, con
     val requestPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
-        if (isGranted) {
-            // Permission granted
-        } else {
-            // Handle permission denial
+        if (!isGranted) {
+            Toast.makeText(context, context.resources.getString(R.string.call_log_permission), Toast.LENGTH_SHORT).show()
         }
     }
     LaunchedEffect(!isSocialMediaTab) {

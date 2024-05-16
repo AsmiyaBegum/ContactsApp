@@ -2,7 +2,9 @@ package com.ab.contactsapp.ui.contact_create
 
 import android.Manifest
 import android.content.Context
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -54,6 +56,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.R
 import com.ab.contactsapp.contactHelper.uriToByteArray
@@ -71,33 +74,32 @@ import com.google.accompanist.permissions.rememberPermissionState
 fun ContactCreateScreen(contact: Contact?, navController : NavController, viewModel: ContactCreationViewmodel = hiltViewModel(),
                         editedContact: (Contact) -> Unit){
     val permissionState = rememberPermissionState(permission = Manifest.permission.WRITE_CONTACTS)
+    val context = LocalContext.current
     val permissionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()) {
             isGranted ->
-        if (isGranted) {
-            // Permission granted
-        } else {
-            // Handle permission denial
+        if (!isGranted) {
+            Toast.makeText(context, context.resources.getString(R.string.permission_denied),Toast.LENGTH_SHORT).show()
         }
     }
-    val context = LocalContext.current
     var imageUri by remember { mutableStateOf<String?>(null) }
     val painter = rememberAsyncImagePainter(imageUri)
 
+    // Ask permission for write contact if not granted
     LaunchedEffect(permissionState) {
-        if(permissionState.status.isGranted){
-
-        }else{
+        if(!permissionState.status.isGranted){
             permissionLauncher.launch(Manifest.permission.WRITE_CONTACTS)
         }
     }
 
 
-    // Remember launcher for activity result
     val pickImageLauncher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         imageUri = uri.toString()
         viewModel.onPhotoChanged(uriToByteArray(contentResolver = context.contentResolver,uri))
     }
+
+
+    // Contact Screen UI
 
     Scaffold(
         modifier = Modifier.fillMaxSize()
@@ -113,115 +115,31 @@ fun ContactCreateScreen(contact: Contact?, navController : NavController, viewMo
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.Top
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth()
-                            .padding(top = 16.dp, bottom = 16.dp),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        // Back button
-                         RoundedBorderIcon(
-                            icon = R.drawable.ic_arrow_back,
-                            modifier = Modifier
-                                .align(Alignment.CenterVertically)
-                                .padding(start = 16.dp)
-                        ){
-                            navController.popBackStack()
-                        }
 
-
-                        // "Add Contact" text
-                        Text(
-                            text = if(viewModel.existingContactId!=-1L){
-                                "Edit Contact"
-                            }else{
-                                "Add Contact"
-                            },
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 20.sp,
-                            textAlign = TextAlign.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(end = 24.dp)
-                                .align(Alignment.CenterVertically)
-                        )
-
-                    }
+                    ContactCreateHeaderView(viewModel, navController, context)
 
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
                             .verticalScroll(rememberScrollState())
                     ) {
-                        Box(
+
+                        ImageAddOrEditLayout(
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(200.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.secondaryContainer)
-                                    .clickable {
-                                        pickImageLauncher.launch("image/*")
-                                    }
-                            ) {
-                                if(imageUri == null) {
-                                    Image(
-                                        painter =  if(contact?.photo!=null)  rememberAsyncImagePainter(contact.photo) else painterResource(id = R.drawable.ic_person), // your clear image
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .size(180.dp)
-                                            .align(Alignment.Center),
-                                        contentScale = ContentScale.FillBounds,
-                                    )
-                                } else {
-                                    Image(
-                                        painter = painter,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .matchParentSize()
-                                            .align(Alignment.Center),
-                                        contentScale = ContentScale.Crop
-                                    )
-                                }
+                                .align(Alignment.CenterHorizontally),
+                            pickImageLauncher,
+                            contact,
+                            imageUri,
+                            painter
 
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .size(50.dp)
-                                    .align(Alignment.BottomEnd)
-                                    .offset(x = (5).dp, y = (-15).dp) // Adjust offset values as needed
-                            ) {
-                                Icon(
-                                    imageVector = if(imageUri == null && contact?.photo==null){
-                                        Icons.Default.Add
-                                    }else{
-                                        Icons.Default.Edit
-                                    },
-                                    contentDescription = "Add photo",
-                                    tint = MaterialTheme.colorScheme.onSecondary,
-                                    modifier = Modifier
-                                        .size(120.dp)
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.secondary)
-                                        .align(Alignment.Center)
-                                        .padding(8.dp)
-                                )
-                            }
-                        }
-
+                        )
 
                         CreateOrEditContact(navController = navController, viewModel = viewModel,permissionState.status.isGranted){
                             viewModel.contact?.let {    editedContact(it) }
                         }
                     }
 
-
-
-
                 }
-
 
             }
         }
@@ -295,7 +213,7 @@ fun CreateOrEditContact(navController : NavController, viewModel: ContactCreatio
                  viewModel.saveContact(context = context)
              }
           }else{
-              Toast.makeText(context, "Kindly provide write contact permission in app settings",Toast.LENGTH_SHORT).show()
+              Toast.makeText(context, context.resources.getString(R.string.write_permission),Toast.LENGTH_SHORT).show()
           }
       }
 
@@ -311,17 +229,119 @@ fun checkFields(
 ) {
     if ((state.firstName.isNotEmpty() || state.lastName.isNotEmpty()) && state.phone.isNotEmpty() ) {
         if (state.email.isNotEmpty() && !android.util.Patterns.EMAIL_ADDRESS.matcher(state.email).matches()) {
-            Toast.makeText(context, "Invalid email address", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.resources.getString(R.string.invalid_email), Toast.LENGTH_SHORT).show()
         }else{
             saveContact()
         }
     } else {
         if(state.firstName.isBlank() && state.lastName.isBlank()){
-            Toast.makeText(context, "Kindly provide name to continue", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.resources.getString(R.string.name_empty), Toast.LENGTH_SHORT).show()
         }else if(state.phone.isBlank()){
-            Toast.makeText(context, "Kindly provide phone number to continue", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.resources.getString(R.string.number_empty), Toast.LENGTH_SHORT).show()
         }
     }
 
 
+}
+
+@Composable
+fun ContactCreateHeaderView(viewModel: ContactCreationViewmodel, navController: NavController, context: Context){
+    Row(
+        modifier = Modifier.fillMaxWidth()
+            .padding(top = 16.dp, bottom = 16.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        // Back button
+        RoundedBorderIcon(
+            icon = R.drawable.ic_arrow_back,
+            modifier = Modifier
+                .align(Alignment.CenterVertically)
+                .padding(start = 16.dp)
+        ){
+            navController.popBackStack()
+        }
+
+
+        // "Add Contact" text
+        Text(
+            text = if(viewModel.existingContactId!=-1L){
+                context.resources.getString(R.string.edit_contact)
+            }else{
+                context.resources.getString(R.string.add_contact)
+            },
+            fontWeight = FontWeight.Bold,
+            fontSize = 20.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(end = 24.dp)
+                .align(Alignment.CenterVertically)
+        )
+
+    }
+}
+
+@Composable
+fun ImageAddOrEditLayout(modifier: Modifier,
+                         pickImageLauncher : ManagedActivityResultLauncher<String, Uri?>,
+                         contact: Contact?,
+                         imageUri : String?,
+                         painter : AsyncImagePainter){
+    Box(
+        modifier = modifier
+    ) {
+        Box(
+            modifier = Modifier
+                .size(200.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.secondaryContainer)
+                .clickable {
+                    pickImageLauncher.launch("image/*")
+                }
+        ) {
+            if(imageUri == null) {
+                Image(
+                    painter =  if(contact?.photo!=null)  rememberAsyncImagePainter(contact.photo) else painterResource(id = R.drawable.ic_person), // your clear image
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(180.dp)
+                        .align(Alignment.Center),
+                    contentScale = ContentScale.FillBounds,
+                )
+            } else {
+                Image(
+                    painter = painter,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .align(Alignment.Center),
+                    contentScale = ContentScale.Crop
+                )
+            }
+
+        }
+
+        Box(
+            modifier = Modifier
+                .size(50.dp)
+                .align(Alignment.BottomEnd)
+                .offset(x = (5).dp, y = (-15).dp)
+        ) {
+            Icon(
+                imageVector = if(imageUri == null && contact?.photo==null){
+                    Icons.Default.Add
+                }else{
+                    Icons.Default.Edit
+                },
+                contentDescription = "Add photo",
+                tint = MaterialTheme.colorScheme.onSecondary,
+                modifier = Modifier
+                    .size(120.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.secondary)
+                    .align(Alignment.Center)
+                    .padding(8.dp)
+            )
+        }
+    }
 }

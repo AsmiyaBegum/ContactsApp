@@ -60,6 +60,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.rememberAsyncImagePainter
+import com.ab.contactsapp.R
 import com.ab.contactsapp.WindowInfo
 import com.ab.contactsapp.domain.model.Contact
 import com.ab.contactsapp.utils.Route
@@ -69,11 +70,202 @@ import com.ab.contactsapp.ui.composables.RoundedCornerButton
 import com.ab.contactsapp.ui.composables.RoundedTabView
 import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
 import com.ab.contactsapp.utils.Constants
+import com.ab.contactsapp.utils.visible
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.gson.Gson
 import java.util.Locale
+
+@Composable
+fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListViewModel, openAppSettings: () -> Unit){
+    val windowInfo = rememberWindowInfo()
+    if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
+        ContactListScreen(modifier = Modifier.fillMaxSize(), navController = navController,viewModel ) {
+            openAppSettings()
+        }
+    }else{
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            ContactListScreen(modifier = Modifier.weight(1f), navController = navController,viewModel) {
+                openAppSettings()
+            }
+            ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel,
+                onBackClicked = {
+
+                }
+            ) { menu ->
+                if(menu == Constants.CALL_LOGS){
+                    navController.navigate(Route.CALL_LOG_SCREEN)
+                }else{
+                    navController.navigate(Route.CONTACT_DETAIL_SCREEN)
+                }
+            }
+        }
+    }
+}
+
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel: ContactListViewModel = hiltViewModel(),openAppSettings :() -> (Unit)) {
+    val readContactPermissionState = rememberPermissionState(Manifest.permission.READ_CONTACTS)
+    val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val windowInfo = rememberWindowInfo()
+
+    val requestPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            viewModel.loadcontacts(context)
+        } else {
+            Toast.makeText(context, context.resources.getString(R.string.read_permission), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(readContactPermissionState) {
+        if (!readContactPermissionState.status.isGranted) {
+            requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+        }
+    }
+
+    var selectedTabIndex by remember {
+        mutableStateOf(Constants.CONTACTS_LIST.indexOf(state.selectedTab))
+    }
+
+    LaunchedEffect(selectedTabIndex) {
+        if(selectedTabIndex == 0 && !readContactPermissionState.status.isGranted){
+
+        }else{
+            viewModel.loadcontacts(context)
+        }
+    }
+
+    Scaffold(
+        modifier = modifier.fillMaxWidth(),
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier
+                    .visible(selectedTabIndex == 0 && readContactPermissionState.status.isGranted),
+                onClick = {
+                    navController.navigate("${Route.CONTACT_CREATE_SCREEN}/${Gson().toJson(Contact())}"){
+                        launchSingleTop = true
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = "Add Contact",
+                    tint = MaterialTheme.colorScheme.onSecondaryContainer)
+            }
+        }
+    ) { padding ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(padding)
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ){
+
+                HideableSearchTextField(
+                    text = state.searchText,
+                    isSearchActive = state.isSearchActive,
+                    onTextChange = viewModel::onSearchTextChanges,
+                    onSearchClick =  viewModel::onToggleSearch ,
+                    onCloseClick =  viewModel::onToggleSearch ,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(90.dp)
+                        .visible((readContactPermissionState.status.isGranted && selectedTabIndex == 0))
+                )
+
+                this@Column.AnimatedVisibility(
+                    visible = !state.isSearchActive,
+                    enter = fadeIn(),
+                    exit = fadeOut()
+                ) {
+
+                    Text(
+                        text = "Contacts",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 30.sp
+                    )
+                }
+            }
+
+
+            RoundedTabView(
+                selectedTabIndex = selectedTabIndex,
+                onTabSelected = { tabIndex ->
+                    selectedTabIndex = tabIndex
+                    viewModel.onTabSelected(tabIndex)
+                },
+                tabs = listOf(Constants.PHONE_CONTACTS, Constants.RANDOM_CONTACTS),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .align(Alignment.CenterHorizontally)
+            )
+
+
+            ContactsScreen(
+                viewModel,
+                state,
+                onItemClick = { contact ->
+                    viewModel.updateSelectedContact(contact)
+                    if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
+                        navController.navigate(Route.CONTACT_DETAIL_SCREEN)
+                    }
+                },
+                modifier = Modifier
+                    .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
+            )
+
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .align(Alignment.CenterHorizontally)
+                    .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
+                verticalArrangement = Arrangement.Center,
+            ){
+                Text(
+                    text = "Kindly provide permission to read contacts",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+
+                RoundedCornerButton(
+                    buttonText = "Add",
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                    onClick = {
+                        openAppSettings()
+                    },
+                    buttonColor = MaterialTheme.colorScheme.secondary,
+                    buttonContentColor = MaterialTheme.colorScheme.onSecondary
+                )
+            }
+
+
+
+
+        }
+    }
+}
+
 
 @Composable
 fun ContactsScreen(
@@ -85,18 +277,7 @@ fun ContactsScreen(
     val contacts = state.contacts
     val showLoader by viewModel.showLoader.collectAsState(initial = false)
     val groupedContacts = groupContacts(contacts)
-    var targetGroup by remember { mutableStateOf<Pair<Char, Int>?>(null) }
     val listState = rememberLazyListState()
-
-
-    LaunchedEffect(targetGroup) {
-        // Find the index of the first contact in the target group
-        val index = contacts.indexOfFirst { it.name?.firstOrNull()?.equals(targetGroup?.first) == true }
-        // Scroll to the calculated position
-        if (index != -1) {
-            listState.scrollToItem(index + (targetGroup?.second ?: 0))
-        }
-    }
 
 
     Box(modifier = modifier,
@@ -105,36 +286,11 @@ fun ContactsScreen(
         if (state.selectedTab == Constants.PHONE_CONTACTS) {
             ContactList(groupedContacts, listState,modifier, onItemClick = onItemClick,showLoader)
         }else{
-            RandomContactList(viewModel.getRandomContacts().collectAsLazyPagingItems(), listState, onItemClick = onItemClick)
+            RandomContactList(viewModel.getRandomContacts().collectAsLazyPagingItems(), listState, onItemClick = onItemClick,viewModel)
         }
     }
 }
 
-@Composable
-fun AToZList(
-    groups: List<Char>,
-    modifier: Modifier,
-    targetGroup: (Char, Int) -> Unit
-) {
-    Column(modifier = modifier) {
-        groups.forEachIndexed { index, group ->
-            // Use a fixed height for each row containing the group label
-            Box(
-                modifier = Modifier
-                    .clickable {
-                        // Set the target group to scroll to
-                        targetGroup(group, index)
-                    }
-            ) {
-                Text(
-                    text = group.toString(),
-                    fontSize = 12.sp,
-                    modifier = Modifier.padding(bottom = 2.dp)
-                )
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -193,48 +349,6 @@ fun ContactList(
     }
 
 }
-
-
-
-
-
-
-
-
-private fun calculateScrollPosition(
-    index: Int,
-    listState: LazyListState
-): Int {
-    val layoutInfo = listState.layoutInfo
-    val headerOffset = layoutInfo.visibleItemsInfo.firstOrNull { it.index == index }?.offset ?: 0
-    return headerOffset
-}
-
-
-
-
-
-
-
-
-
-
-
-//@OptIn(ExperimentalFoundationApi::class)
-//@Composable
-//fun ContactList(groupedContacts: Map<Char, List<ContactInfo>>, scrollState: LazyListState, modifier: Modifier) {
-//    LazyColumn(modifier = modifier,state = scrollState) {
-//        groupedContacts.forEach { (group, contacts) ->
-//            stickyHeader {
-//                Text(text = group.toString())
-//            }
-//            items(contacts) { contact ->
-//                    ContactItem(contact)
-//            }
-//        }
-//    }
-//
-//}
 
 
 @Composable
@@ -303,204 +417,24 @@ fun groupContacts(contacts: List<Contact>): Map<Char, List<Contact>> {
 }
 
 
-@OptIn(ExperimentalPermissionsApi::class)
-@Composable
-fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel: ContactListViewModel = hiltViewModel(),openAppSettings :() -> (Unit)) {
-    val readContactPermissionState = rememberPermissionState(Manifest.permission.READ_CONTACTS)
-    val state by viewModel.state.collectAsState()
-    val context = LocalContext.current
-    val windowInfo = rememberWindowInfo()
-
-    val requestPermissionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            viewModel.loadcontacts(context)
-        } else {
-
-        }
-    }
-
-    LaunchedEffect(readContactPermissionState) {
-        if (!readContactPermissionState.status.isGranted) {
-            requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
-        }
-    }
-
-    var selectedTabIndex by remember {
-        mutableStateOf(Constants.CONTACTS_LIST.indexOf(state.selectedTab))
-    }
-
-    LaunchedEffect(selectedTabIndex) {
-        if(selectedTabIndex == 0 && !readContactPermissionState.status.isGranted){
-
-        }else{
-            viewModel.loadcontacts(context)
-        }
-    }
-
-    Scaffold(
-        modifier = modifier.fillMaxWidth(),
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier
-                    .visible(selectedTabIndex == 0 && readContactPermissionState.status.isGranted),
-                onClick = {
-//                    requestPermission(Manifest.permission.WRITE_CONTACTS)
-                    navController.navigate("${Route.CONTACT_CREATE_SCREEN}/${Gson().toJson(Contact())}"){
-                    launchSingleTop = true
-                }
-                          },
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = "Add Contact",
-                    tint = MaterialTheme.colorScheme.onSecondaryContainer)
-            }
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ){
-
-                HideableSearchTextField(
-                    text = state.searchText,
-                    isSearchActive = state.isSearchActive,
-                    onTextChange = viewModel::onSearchTextChanges,
-                    onSearchClick =  viewModel::onToggleSearch ,
-                    onCloseClick =  viewModel::onToggleSearch ,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(90.dp)
-                        .visible((readContactPermissionState.status.isGranted && selectedTabIndex == 0))
-                )
-
-                this@Column.AnimatedVisibility(
-                    visible = !state.isSearchActive,
-                    enter = fadeIn(),
-                    exit = fadeOut()
-                ) {
-
-                    Text(
-                        text = "Contacts",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 30.sp
-                    )
-                }
-            }
-
-
-            RoundedTabView(
-                selectedTabIndex = selectedTabIndex,
-                onTabSelected = { tabIndex ->
-                    selectedTabIndex = tabIndex
-                    viewModel.onTabSelected(tabIndex)
-                },
-                tabs = listOf(Constants.PHONE_CONTACTS, Constants.RANDOM_CONTACTS),
-                modifier = Modifier
-//                    .fillMaxWidth()
-                    .padding(16.dp)
-                    .align(Alignment.CenterHorizontally)
-            )
-
-
-            ContactsScreen(
-                viewModel,
-                state,
-                onItemClick = { contact ->
-                    viewModel.updateSelectedContact(contact)
-                  if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
-                      navController.navigate(Route.CONTACT_DETAIL_SCREEN)
-                  }
-                },
-                modifier = Modifier
-                    .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
-            )
-
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f)
-                    .align(Alignment.CenterHorizontally)
-                    .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
-                verticalArrangement = Arrangement.Center,
-            ){
-                Text(
-                    text = "Kindly provide permission to read contacts",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 15.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
-
-                RoundedCornerButton(
-                    buttonText = "Add",
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    onClick = {
-                        openAppSettings()
-                    },
-                    buttonColor = MaterialTheme.colorScheme.secondary,
-                    buttonContentColor = MaterialTheme.colorScheme.onSecondary
-                )
-            }
-
-
-
-
-        }
-    }
-}
-
-@Composable
-fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListViewModel, openAppSettings: () -> Unit){
-    val windowInfo = rememberWindowInfo()
-    if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
-        ContactListScreen(modifier = Modifier.fillMaxSize(), navController = navController,viewModel ) {
-            openAppSettings()
-        }
-    }else{
-        Row(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            ContactListScreen(modifier = Modifier.weight(1f), navController = navController,viewModel) {
-                openAppSettings()
-            }
-            ContactDetailScreen(modifier  = Modifier.weight(1f),navController = navController,viewModel,
-                onBackClicked = {
-
-                }
-            ) { menu ->
-                if(menu == Constants.CALL_LOGS){
-                    navController.navigate(Route.CALL_LOG_SCREEN)
-                }else{
-                    navController.navigate(Route.CONTACT_DETAIL_SCREEN)
-                }
-            }
-        }
-    }
-}
-
 @Composable
 fun RandomContactList(
     pagingContact: LazyPagingItems<Contact>,
     listState: LazyListState,
-    onItemClick: (Contact) -> Unit
+    onItemClick: (Contact) -> Unit,
+    viewModel: ContactListViewModel
 ) {
-
     val context = LocalContext.current
+    val showToast = viewModel.showToast.collectAsState(initial = "")
+    LaunchedEffect(showToast) {
+        if(showToast.value.isNotBlank()){
+            Toast.makeText(
+                context,
+                showToast.value,
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    }
     LaunchedEffect(key1 = pagingContact.loadState) {
         if(pagingContact.loadState.refresh is LoadState.Error) {
             Toast.makeText(
@@ -547,17 +481,6 @@ fun RandomContactList(
 }
 
 
-
-
-
-@Composable
-fun Modifier.visible(visible: Boolean): Modifier {
-    return if (visible) {
-        this
-    } else {
-        this.alpha(0f) // Set alpha to 0 to make the composable invisible
-    }
-}
 
 
 

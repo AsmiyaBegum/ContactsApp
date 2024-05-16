@@ -5,4 +5,17 @@
     <string name="phone">Phone</string>
     <string name="email">Email</string>
     <string name="save_changes">Save Changes</string>
+    <string name="permission_denied">Permission Denied</string>
+    <string name="edit_contact">Edit Contact</string>
+    <string name="add_contact">Add Contact</string>
+    <string name="write_permission">Kindly provide write contact permission in app settings</string>
+    <string name="read_permission">Kindly provide read contact permission in app settings</string>
+    <string name="call_permission">Kindly provide call permission in app settings</string>
+    <string name="call_log_permission">Kindly provide call log permission in app settings</string>
+    <string name="invalid_email">Invalid email address</string>
+    <string name="name_empty">Kindly provide name to continue</string>
+    <string name="number_empty">Kindly provide phone number to continue</string>
+    <string name="no_call_logs">No Call Logs</string>
+    <string name="select_contacts_to_display">Select contact to show detail</string>
+    <string name="contact_fav">Contact Marked as Favorite</string>
 </resources>

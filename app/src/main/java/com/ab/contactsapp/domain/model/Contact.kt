@@ -79,7 +79,6 @@ data class CallLogGroup(
     val date: Long, // Date in milliseconds
     val callLogs: List<CallLogEntry>
 )
-// Usage
 
 fun ContactInfo.toContactEntity(): Contact {
     return Contact(

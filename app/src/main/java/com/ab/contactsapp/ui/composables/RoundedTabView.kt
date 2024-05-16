@@ -8,26 +8,19 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.Black
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-private fun MyTabIndicator(
+private fun RoundedTabIndicator(
     indicatorWidth: Dp,
     indicatorOffset: Dp,
     indicatorColor: Color,
@@ -51,7 +44,7 @@ private fun MyTabIndicator(
 }
 
 @Composable
-private fun MyTabItem(
+private fun RoundedTabItem(
     isSelected: Boolean,
     onClick: () -> Unit,
     tabWidth: Dp,
@@ -103,7 +96,7 @@ fun RoundedTabView(
             .background(MaterialTheme.colorScheme.surface)
             .height(intrinsicSize = IntrinsicSize.Min),
     ) {
-        MyTabIndicator(
+        RoundedTabIndicator(
             indicatorWidth = tabWidth,
             indicatorOffset = indicatorOffset,
             indicatorColor = androidx.compose.material3.MaterialTheme.colorScheme.surface,
@@ -115,7 +108,7 @@ fun RoundedTabView(
         ) {
             tabs.mapIndexed { index, text ->
                 val isSelected = index == selectedTabIndex
-                MyTabItem(
+                RoundedTabItem(
                     isSelected = isSelected,
                     onClick = {
                         onTabSelected(index)

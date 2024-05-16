@@ -5,12 +5,15 @@ import android.content.Context
 import android.net.Uri
 import android.provider.ContactsContract
 import android.util.Log
+import android.view.View
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.ab.contactsapp.ContactApp
 import com.ab.contactsapp.contactHelper.contact
 import com.ab.contactsapp.contactHelper.getCallLogDetails
 import com.ab.contactsapp.contactHelper.markContactAsFavorite
@@ -20,8 +23,8 @@ import com.ab.contactsapp.domain.model.Contact
 import com.ab.contactsapp.domain.repository.ContactDataSource
 import com.ab.contactsapp.utils.SearchContact
 import com.ab.contactsapp.domain.usecase.ContactScreenUseCase
-import com.ab.contactsapp.ui.base.BaseViewModel
 import com.ab.contactsapp.utils.Constants
+import com.ab.contactsapp.utils.Utils
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -41,19 +44,42 @@ class ContactListViewModel  @Inject constructor(
     private val contactDataSource: ContactDataSource,
     private val useCase: ContactScreenUseCase,
     private val savedStateHandle: SavedStateHandle
-) : BaseViewModel() {
+) : ViewModel() {
 
     private val searchContact = SearchContact()
     val contactState: MutableState<Contact?> = mutableStateOf(null)
 
     private val _callLogEntries = MutableStateFlow<List<CallLogGroup>>(emptyList())
     val callLogEntries: Flow<List<CallLogGroup>> = _callLogEntries.asStateFlow()
+
     private val _showLoader = MutableStateFlow<Boolean>(false)
     val showLoader : Flow<Boolean> = _showLoader.asStateFlow()
 
-    init {
-        Log.d("recompose","recompose")
-    }
+    private val _showToast = MutableStateFlow<String>("")
+    val showToast : Flow<String> = _showToast.asStateFlow()
+
+    private val contacts = savedStateHandle.getStateFlow("contacts", emptyList<Contact>())
+    private val searchText = savedStateHandle.getStateFlow("searchText", "")
+    private val selectedTab = savedStateHandle.getStateFlow("selectedTab", Constants.PHONE_CONTACTS)
+    private val isSearchActive = savedStateHandle.getStateFlow("isSearchActive", false)
+
+    val state = combine(contacts, searchText,selectedTab,isSearchActive){ contacts, searchText,selectedTab,isSearchActive  ->
+
+        ContactListState(
+            contacts = if(selectedTab == Constants.PHONE_CONTACTS) {
+                searchContact.searchLocalDeviceContacts(contacts,searchText)
+            }else{
+                contacts
+            },
+            searchText = searchText,
+            selectedTab = selectedTab,
+            isSearchActive = isSearchActive
+        )
+
+    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ContactListState())
+
+
+
 
     private val cachedRandomContacts = MutableStateFlow<Flow<PagingData<Contact>>>(flowOf(PagingData.empty()))
 
@@ -63,10 +89,15 @@ class ContactListViewModel  @Inject constructor(
     }
 
     private fun fetchRandomContacts() {
-        viewModelScope.launch {
-            val randomContacts = useCase.getRemoteContacts().flow.cachedIn(viewModelScope)
-            cachedRandomContacts.value = randomContacts
+        if(Utils.checkInternetConnection(ContactApp.applicationContext())){
+            viewModelScope.launch(Dispatchers.IO) {
+                val randomContacts = useCase.getRemoteContacts().flow.cachedIn(viewModelScope)
+                cachedRandomContacts.value = randomContacts
+            }
+        }else{
+            _showToast.value = "Kindly connect internet to fetch random contact"
         }
+
     }
 
     fun getRandomContacts(): Flow<PagingData<Contact>> {
@@ -75,7 +106,7 @@ class ContactListViewModel  @Inject constructor(
 
 
     private fun deleteRandomContacts() {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
             useCase.deleteRemoveContacts()
         }
     }
@@ -86,7 +117,6 @@ class ContactListViewModel  @Inject constructor(
                 val callLog =  getCallLogDetails(contentResolver, phoneNumber)
                 _callLogEntries.value = groupCallLogEntriesByDate(callLog)
             }
-
         }
     }
 
@@ -112,28 +142,6 @@ class ContactListViewModel  @Inject constructor(
             contactState.value = selectedContact
         }
     }
-
-
-
-    private val contacts = savedStateHandle.getStateFlow("contacts", emptyList<Contact>())
-    private val searchText = savedStateHandle.getStateFlow("searchText", "")
-    private val selectedTab = savedStateHandle.getStateFlow("selectedTab", Constants.PHONE_CONTACTS)
-    private val isSearchActive = savedStateHandle.getStateFlow("isSearchActive", false)
-
-    val state = combine(contacts, searchText,selectedTab,isSearchActive){ contacts, searchText,selectedTab,isSearchActive  ->
-
-        ContactListState(
-            contacts = if(selectedTab == Constants.PHONE_CONTACTS) {
-                searchContact.searchLocalDeviceContacts(contacts,searchText)
-            }else{
-                contacts
-            },
-            searchText = searchText,
-            selectedTab = selectedTab,
-            isSearchActive = isSearchActive
-        )
-
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), ContactListState())
 
 
     fun loadcontacts(context: Context){
@@ -188,16 +196,6 @@ class ContactListViewModel  @Inject constructor(
         }
         savedStateHandle["contacts"] = listOf<Contact>()
         contactState.value = null
-    }
-
-
-    
-
-    fun deleteNoteById(id : Long) {
-        viewModelScope.launch {
-//            contactDataSource.deleteNoteById(id)
-//            loadcontacts()
-        }
     }
 }
 

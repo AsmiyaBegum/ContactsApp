@@ -2,6 +2,9 @@ package com.ab.contactsapp.utils
 
 import android.content.Context
 import android.net.ConnectivityManager
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import com.ab.contactsapp.WindowInfo
 import com.ab.contactsapp.domain.model.CallLogEntry
 import com.ab.contactsapp.domain.model.Contact
@@ -33,6 +36,15 @@ object Utils {
         }else{
             "(${entry.type} - ${entry.duration / 60} min ${entry.duration % 60} sec)"
         }
+    }
+}
+
+@Composable
+fun Modifier.visible(visible: Boolean): Modifier {
+    return if (visible) {
+        this
+    } else {
+        this.alpha(0f) // Set alpha to 0 to make the composable invisible
     }
 }
 

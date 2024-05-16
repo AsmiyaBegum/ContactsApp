@@ -11,12 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import com.ab.contactsapp.ui.contact_list.visible
+import com.ab.contactsapp.utils.visible
 
 
 @Composable
@@ -42,7 +39,7 @@ fun OutlinedTextFieldWithIcon(
                     .visible(showIcon)
             )
 
-        // Outlined text field for first name
+        // Outlined text field
         OutlinedTextField(
             value = fieldValue, // Provide initial value here
             onValueChange = onValueChanged,

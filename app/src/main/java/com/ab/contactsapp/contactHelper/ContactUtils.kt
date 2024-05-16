@@ -34,100 +34,6 @@ private val selectionArgs = arrayOf(
     ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE
 )
 
-//fun getContacts(contentResolver: ContentResolver): List<Contact> {
-//    val contacts = mutableListOf<Contact>()
-//    val cursor = contentResolver.query(
-//        ContactsContract.Data.CONTENT_URI,
-//        arrayOf(
-//            ContactsContract.Data.CONTACT_ID,
-//            ContactsContract.Data.DISPLAY_NAME_PRIMARY,
-//            ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME,
-//            ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME,
-//            ContactsContract.CommonDataKinds.Phone.NUMBER,
-//            ContactsContract.CommonDataKinds.Email.ADDRESS,
-//            ContactsContract.CommonDataKinds.Photo.PHOTO
-//        ),
-//        "${ContactsContract.Data.MIMETYPE} = ?",
-//        arrayOf(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE),
-//        null
-//    )
-//    cursor?.use {
-//        val contactIdColumnIndex = it.getColumnIndex(ContactsContract.Data.CONTACT_ID)
-//        val nameColumnIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.GIVEN_NAME)
-//        val lastNameColumnIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.StructuredName.FAMILY_NAME)
-//        val phoneNumberColumnIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
-//        val emailColumnIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
-//        val photoColumnIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Photo.PHOTO)
-//
-//
-//        while (it.moveToNext()) {
-//            val contactId = if (contactIdColumnIndex != -1) {
-//                it.getString(contactIdColumnIndex)
-//            } else {
-//                // Handle case where column index is -1 (not found)
-//                null
-//            }
-//            val name = if (nameColumnIndex != -1) {
-//                it.getString(nameColumnIndex)
-//            } else {
-//                // Handle case where column index is -1 (not found)
-//                null
-//            }
-//
-//            val lastName = if (lastNameColumnIndex != -1) {
-//                it.getString(lastNameColumnIndex)
-//            } else {
-//                // Handle case where column index is -1 (not found)
-//                null
-//            }
-//
-//            val phoneNumber = if (phoneNumberColumnIndex != -1) {
-//                it.getString(phoneNumberColumnIndex)
-//            } else {
-//                // Handle case where column index is -1 (not found)
-//                null
-//            }
-//            val email = if (emailColumnIndex != -1) {
-//                it.getString(emailColumnIndex)
-//            } else {
-//                // Handle case where column index is -1 (not found)
-//                null
-//            }
-//
-//            val photoByteArray = if(contactId!=null){
-//                val photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId.toLong())
-//                val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(contentResolver, photoUri)
-//                bitmapToByteArray(inputStream?.use(BitmapFactory::decodeStream))
-//            }else{
-//                null
-//            }
-//
-//
-//
-//
-//            // Add error handling and add the contact to the list
-//            if (contactId != null) {
-//                contacts.add(Contact(name, lastName = lastName, phoneNumber, email, contactId,photoByteArray))
-//            }
-//        }
-//    }
-//    cursor?.close()
-//    val contactEmails =  getContactEmails(contentResolver)
-//    contacts.forEach {
-//        contactEmails[it.contactId]?.let { emails ->
-//            it.email = emails[0]
-//        }
-//    }
-//
-//    contact(contentResolver)
-//
-//    return contacts
-//}
-// private fun getContactPhoto(context: Context, contactId: Long): Bitmap? {
-//    val photoUri = ContentUris.withAppendedId(ContactsContract.Contacts.CONTENT_URI, contactId)
-//    val inputStream = ContactsContract.Contacts.openContactPhotoInputStream(context.contentResolver, photoUri)
-//    return inputStream?.use(BitmapFactory::decodeStream)
-//}
 
 fun getCallLogDetails(contentResolver: ContentResolver, phoneNumber: String): List<CallLogEntry> {
     val callLogList = mutableListOf<CallLogEntry>()
@@ -192,9 +98,6 @@ fun markContactAsFavorite(contentResolver: ContentResolver, contactId: Long) {
 
 fun saveContact(context : Context, contact: Contact) {
     val values = ContentValues()
-//    values.put(ContactsContract.RawContacts.ACCOUNT_TYPE, null)
-//    values.put(ContactsContract.RawContacts.ACCOUNT_NAME, null)
-
 
     val rawContactUri = context.contentResolver.insert(ContactsContract.RawContacts.CONTENT_URI, values)
     val rawContactId = rawContactUri?.lastPathSegment?.toLongOrNull()
@@ -300,31 +203,6 @@ fun bitmapToByteArray(bitmap: Bitmap?, format: Bitmap.CompressFormat = Bitmap.Co
     return outputStream.toByteArray()
 }
 
-private fun getContactEmails(contentResolver: ContentResolver): HashMap<String, ArrayList<String>> {
-    val contactsEmailMap = HashMap<String, ArrayList<String>>()
-    val emailCursor = contentResolver.query(ContactsContract.CommonDataKinds.Email.CONTENT_URI,
-        null,
-        null,
-        null,
-        null)
-    if (emailCursor != null && emailCursor.count > 0) {
-        val contactIdIndex = emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.CONTACT_ID)
-        val emailIndex = emailCursor.getColumnIndex(ContactsContract.CommonDataKinds.Email.ADDRESS)
-        while (emailCursor.moveToNext()) {
-            val contactId = emailCursor.getString(contactIdIndex)
-            val email = emailCursor.getString(emailIndex)
-            //check if the map contains key or not, if not then create a new array list with email
-            if (contactsEmailMap.containsKey(contactId)) {
-                contactsEmailMap[contactId]?.add(email)
-            } else {
-                contactsEmailMap[contactId] = arrayListOf(email)
-            }
-        }
-        //contact contains all the emails of a particular contact
-        emailCursor.close()
-    }
-    return contactsEmailMap
-}
 
 fun uriToByteArray(contentResolver: ContentResolver, uri: Uri?): ByteArray? {
     if(uri == null)
@@ -344,11 +222,6 @@ fun uriToByteArray(contentResolver: ContentResolver, uri: Uri?): ByteArray? {
     return null
 }
 
-class UserContactDetail {
-    var name: String? = null
-    var emailId: List<String> = ArrayList()
-    var phoneNumber: List<String> = ArrayList()
-}
 
 fun contact(contentResolver: ContentResolver) : List<Contact> {
     val userContactDetailLinkedHashMap: LinkedHashMap<Int, Contact?> = LinkedHashMap()
@@ -411,7 +284,6 @@ fun contact(contentResolver: ContentResolver) : List<Contact> {
       return  userContactDetailLinkedHashMap.mapNotNull { it.value }
     } catch (e: Exception) {
         return listOf<Contact>()
-//        Crashlytics.getInstance().core.logException(e)
     }
 }
 

@@ -52,8 +52,8 @@ class ContactCreationViewmodel @Inject constructor(
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), CreateContactState())
 
 
-    private val _hasNotBeenSaved = MutableStateFlow(false)
-    val hasContactBeenSaved = _hasNotBeenSaved.asStateFlow()
+    private val _hasContactBeenSaved = MutableStateFlow(false)
+    val hasContactBeenSaved = _hasContactBeenSaved.asStateFlow()
 
     var existingContactId : Long = -1
 
@@ -115,6 +115,6 @@ class ContactCreationViewmodel @Inject constructor(
             }
 
         }
-        _hasNotBeenSaved.value = true
+        _hasContactBeenSaved.value = true
     }
 }

@@ -27,8 +27,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.ab.contactsapp.domain.model.Contact
-import com.ab.contactsapp.ui.base.BaseViewModel
-import com.ab.contactsapp.ui.composables.SearchBar
 import com.ab.contactsapp.ui.contact_create.ContactCreateScreen
 import com.ab.contactsapp.ui.contact_detail.CallLogScreen
 import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
@@ -42,116 +40,25 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 
 
-const val PERMISSION_REQUEST_CODE = 101
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-
-    private val permissionsToRequest = arrayOf(
-        Manifest.permission.READ_CONTACTS,
-        Manifest.permission.WRITE_CONTACTS
-
-    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
             AppTheme {
-//                val viewModel = viewModel<BaseViewModel>()
-//                val dialogQueue = viewModel.visiblePermissionDialogQueue
-//
-//
-//                val multiplePermissionResultLauncher = rememberLauncherForActivityResult(
-//                    contract = ActivityResultContracts.RequestMultiplePermissions(),
-//                    onResult = { perms ->
-//                        permissionsToRequest.forEach { permission ->
-//                            viewModel.onPermissionResult(
-//                                permission = permission,
-//                                isGranted = perms[permission] == true
-//                            )
-//                        }
-//                    }
-//                )
-
-               MainContent()
-
-//                dialogQueue
-//                    .reversed()
-//                    .forEach { permission ->
-//                        PermissionDialog(
-//                            permissionTextProvider = when (permission) {
-//                                Manifest.permission.READ_CONTACTS -> {
-//                                    ReadContactPermissionTextProvider()
-//                                }
-//                                Manifest.permission.WRITE_CONTACTS -> {
-//                                    WriteContactPermissionTextProvider()
-//                                }
-//
-//                                else -> return@forEach
-//                            },
-//                            isPermanentlyDeclined = !shouldShowRequestPermissionRationale(
-//                                permission
-//                            ),
-//                            onDismiss = viewModel::dismissDialog,
-//                            onOkClick = {
-//                                viewModel.dismissDialog()
-//                                multiplePermissionResultLauncher.launch(
-//                                    arrayOf(permission)
-//                                )
-//                            },
-//                            onGoToAppSettingsClick = ::openAppSettings
-//                        )
-//                    }
+                MainContent()
             }
         }
     }
-
-//    override fun onRequestPermissionsResult(
-//        requestCode: Int,
-//        permissions: Array<String>,
-//        grantResults: IntArray
-//    ) {
-//        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
-//        if (requestCode == PERMISSION_REQUEST_CODE) {
-//            if ((grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
-////                locationPermissionGranted.value = true
-//            } else {
-//                // Permission denied
-//                Toast.makeText(this, "Location Permission denied", Toast.LENGTH_SHORT).show()
-//            }
-//            return
-//        }
-//    }
 
 
     @Composable
     fun MainContent() {
         val navController = rememberNavController()
-        val context : Context = LocalContext.current
         val viewModel: ContactListViewModel = hiltViewModel()
-        val windowInfo = rememberWindowInfo()
-        val readContactPermissionResultLauncher = rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = { isGranted ->
-                viewModel.onPermissionResult(
-                    permission = Manifest.permission.READ_CONTACTS,
-                    isGranted = isGranted
-                )
-            }
-        )
-//        val dialog = PermissionDialog(
-//            permissionTextProvider = ReadContactPermissionTextProvider(),
-//            isPermanentlyDeclined = shouldShowRequestPermissionRationale(Manifest.permission.READ_CONTACTS) ,
-//            onDismiss = { viewModel.dismissDialog() },
-//            onOkClick = {
-//                viewModel.dismissDialog()
-//                readContactPermissionResultLauncher.launch(Manifest.permission.READ_CONTACTS)
-//            },
-//            onGoToAppSettingsClick = ::openAppSettings)
-
-
 
         Box {
             NavHost(navController = navController, startDestination = Route.CONTACT_LIST_SCREEN) {
@@ -200,12 +107,6 @@ class MainActivity : ComponentActivity() {
                 }
 
 
-                composable(Route.CONTACT_SEARCH_SCREEN){
-                    SearchBar(
-                       viewModel
-                    )
-                }
-
                 composable(Route.CALL_LOG_SCREEN){
                     CallLogScreen(navController,viewModel )
                 }
@@ -214,48 +115,6 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-
-    @Composable
-    private fun launchPermission(viewModel: BaseViewModel,permission : String): ManagedActivityResultLauncher<String, Boolean> {
-        return rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestPermission(),
-            onResult = { isGranted ->
-                viewModel.onPermissionResult(
-                    permission = permission,
-                    isGranted = isGranted
-                )
-            }
-        )
-    }
-
-//    private fun checkContactPermission(): Boolean {
-//        return ActivityCompat.checkSelfPermission(
-//            this,
-//            Manifest.permission.READ_CONTACTS
-//        ) == PackageManager.PERMISSION_GRANTED
-//    }
-
-//    private fun requestPermission() {
-//        if (!checkContactPermission()) {
-//            // Permission is not granted, request it
-//            if (ActivityCompat.shouldShowRequestPermissionRationale(
-//                    this,
-//                    Manifest.permission.READ_CONTACTS
-//                )
-//            ) {
-//                Toast.makeText(this, "Contact Permission denied", Toast.LENGTH_SHORT).show()
-//            } else {
-//                ActivityCompat.requestPermissions(
-//                    this,
-//                    arrayOf(Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS),
-//                    PERMISSION_REQUEST_CODE
-//                )
-//            }
-//        } else {
-////            locationPermissionGranted.value = true
-//        }
-//
-//}
 
 }
 

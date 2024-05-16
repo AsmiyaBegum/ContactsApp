@@ -71,6 +71,7 @@ import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
 import com.ab.contactsapp.utils.Constants
 import com.ab.contactsapp.utils.visible
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.gson.Gson
@@ -211,34 +212,6 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                     .align(Alignment.CenterHorizontally)
             )
 
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterHorizontally)
-                    .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
-                verticalArrangement = Arrangement.Center,
-            ){
-                Text(
-                    text = "Kindly provide permission to read contacts",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = 15.sp,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                )
-
-                RoundedCornerButton(
-                    buttonText = "Add",
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                    onClick = {
-                        openAppSettings()
-                    },
-                    buttonColor = MaterialTheme.colorScheme.secondary,
-                    buttonContentColor = MaterialTheme.colorScheme.onSecondary
-                )
-            }
 
 
             ContactsScreen(
@@ -250,10 +223,10 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                         navController.navigate(Route.CONTACT_DETAIL_SCREEN)
                     }
                 },
-                modifier = Modifier
-                    .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
+                modifier = Modifier,
+                readContactPermissionState = readContactPermissionState,
+                openAppSettings = openAppSettings
             )
-
 
 
 
@@ -264,12 +237,15 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
 }
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun ContactsScreen(
     viewModel: ContactListViewModel,
     state: ContactListState,
     onItemClick: (Contact) -> Unit,
-    modifier: Modifier
+    modifier: Modifier,
+    readContactPermissionState : PermissionState,
+    openAppSettings: () -> Unit
 ) {
     val contacts = state.contacts
     val showLoader by viewModel.showLoader.collectAsState(initial = false)
@@ -281,10 +257,46 @@ fun ContactsScreen(
         contentAlignment = Alignment.Center
     ) {
         if (state.selectedTab == Constants.PHONE_CONTACTS) {
-            ContactList(groupedContacts, listState,modifier, onItemClick = onItemClick,showLoader)
+            if(!readContactPermissionState.status.isGranted){
+                showPermissionToAdd {
+                    openAppSettings()
+                }
+            }else{
+                ContactList(groupedContacts, listState,modifier, onItemClick = onItemClick,showLoader)
+            }
         }else{
             RandomContactList(viewModel.getRandomContacts().collectAsLazyPagingItems(), listState, onItemClick = onItemClick,viewModel)
         }
+    }
+}
+
+@Composable
+fun showPermissionToAdd(openAppSettings: () -> Unit){
+    Column(
+        modifier = Modifier
+            .fillMaxWidth(),
+        verticalArrangement = Arrangement.Center,
+    ){
+        Text(
+            text = "Kindly provide permission to read contacts",
+            fontWeight = FontWeight.Medium,
+            fontSize = 15.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        )
+
+        RoundedCornerButton(
+            buttonText = "Add",
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally),
+            onClick = {
+                openAppSettings()
+            },
+            buttonColor = MaterialTheme.colorScheme.secondary,
+            buttonContentColor = MaterialTheme.colorScheme.onSecondary
+        )
     }
 }
 

@@ -153,9 +153,12 @@ fun ContactList(
         Box(
             modifier = modifier.fillMaxSize(),
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.align(Alignment.Center)
-            )
+            Text(
+                modifier = Modifier
+                    .padding(bottom = 30.dp)
+                    .align(Alignment.Center),
+                textAlign = TextAlign.Center,
+                text = "No contact found")
         }
 
 

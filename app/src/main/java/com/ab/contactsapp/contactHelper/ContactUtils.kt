@@ -273,18 +273,23 @@ fun editContact(context: Context,contact: Contact) {
             arrayOf(contact.contactId.toString(), ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE)
         )
 
-        // Update Photo
-        if (contact.photo != null) {
-            val photoValues = ContentValues().apply {
-                put(ContactsContract.CommonDataKinds.Photo.PHOTO_ID, contact.photo)
-            }
-            context.contentResolver.update(
-                ContactsContract.Data.CONTENT_URI,
-                photoValues,
-                "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
-                arrayOf(contact.contactId.toString(), ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE)
-            )
+    val editedPhotoByteArray = contact.photo
+
+    // Update Photo
+    if (editedPhotoByteArray != null) {
+        val photoValues = ContentValues().apply {
+            put(ContactsContract.CommonDataKinds.Photo.PHOTO, editedPhotoByteArray)
         }
+        context.contentResolver.update(
+            ContactsContract.Data.CONTENT_URI,
+            photoValues,
+            "${ContactsContract.Data.CONTACT_ID} = ? AND ${ContactsContract.Data.MIMETYPE} = ?",
+            arrayOf(
+                contact.contactId.toString(),
+                ContactsContract.CommonDataKinds.Photo.CONTENT_ITEM_TYPE
+            )
+        )
+    }
 
 }
 

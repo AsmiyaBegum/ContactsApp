@@ -184,6 +184,7 @@ fun ContactDetailScreen(
                                         }else{
                                             if(menu == Constants.MARK_AS_FAV){
                                                 viewModel.markContactAsFav(context.contentResolver, contactId = contact!!.contactId.toLong())
+                                                Toast.makeText(context, "Contact Marked as Favorite",Toast.LENGTH_SHORT).show()
                                             }else{
                                                 viewModel.deleteContact(context.contentResolver,contact!!.contactId.toLong())
                                                 onMenuClicked(Constants.DELETE)

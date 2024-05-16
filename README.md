@@ -1,4 +1,4 @@
-# Contact Application README
+# Contact Application
 
 ## Table of Contents
 
@@ -60,3 +60,11 @@ The Contact Application is an Android native app that allows users to manage the
    - Shows the call history of the selected contact.
 4. *Add/Edit Contact Screen*
    - Form to add or edit contact information.
+  
+**Application Screenshots** :
+
+<img width="200" height="350" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.28%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <img width="200" height="350" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.29%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img width="200" height="350" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.29%20PM%20(1).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img width="200" height="350" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.30%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img width="200" height="350" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.29%20PM%20(2).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img width="200" height="350" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%201.35.30%20PM%20(1).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;

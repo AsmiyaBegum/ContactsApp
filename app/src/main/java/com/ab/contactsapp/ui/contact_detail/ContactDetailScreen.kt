@@ -59,8 +59,6 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.domain.contact.Contact
 import com.ab.contactsapp.domain.contact.Route
-import com.ab.contactsapp.nestedScrollView.VerticalNestedScrollView
-import com.ab.contactsapp.nestedScrollView.rememberNestedScrollViewState
 import com.ab.contactsapp.rememberWindowInfo
 import com.ab.contactsapp.ui.composables.DropDownMenu
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel

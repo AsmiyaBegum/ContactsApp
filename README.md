@@ -87,5 +87,5 @@ The Contact Application is an Android native app that allows users to manage the
 
 **Tablet View** :
 
-<img width="500" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144842.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
-<img width="500" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144859.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<img width="400" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144842.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<img width="400" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144859.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 

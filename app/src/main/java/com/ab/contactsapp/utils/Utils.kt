@@ -3,8 +3,8 @@ package com.ab.contactsapp.utils
 import android.content.Context
 import android.net.ConnectivityManager
 import com.ab.contactsapp.WindowInfo
-import com.ab.contactsapp.domain.contact.CallLogEntry
-import com.ab.contactsapp.domain.contact.Contact
+import com.ab.contactsapp.domain.model.CallLogEntry
+import com.ab.contactsapp.domain.model.Contact
 import com.google.gson.Gson
 
 object Utils {

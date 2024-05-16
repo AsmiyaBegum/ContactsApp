@@ -1,6 +1,5 @@
 package com.ab.contactsapp.contactHelper
 
-import android.annotation.SuppressLint
 import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.ContentValues
@@ -11,8 +10,8 @@ import android.graphics.BitmapFactory
 import android.net.Uri
 import android.provider.CallLog
 import android.provider.ContactsContract
-import com.ab.contactsapp.domain.contact.CallLogEntry
-import com.ab.contactsapp.domain.contact.Contact
+import com.ab.contactsapp.domain.model.CallLogEntry
+import com.ab.contactsapp.domain.model.Contact
 import com.ab.contactsapp.utils.Utils
 import java.io.ByteArrayOutputStream
 import java.io.InputStream

@@ -5,7 +5,8 @@ import androidx.room.Room
 import com.ab.contactsapp.BuildConfig
 import com.ab.contactsapp.data.contact.ContactDataSourceImpl
 import com.ab.contactsapp.data.data_source.ContactDatabase
-import com.ab.contactsapp.domain.contact.ContactDataSource
+import com.ab.contactsapp.data.repository.ContactRepository
+import com.ab.contactsapp.domain.repository.ContactDataSource
 import com.ab.contactsapp.service.ContactService
 import dagger.Module
 import dagger.Provides
@@ -43,12 +44,6 @@ object AppModule {
     @Provides
     fun provideOkHttpClient(): OkHttpClient {
         return OkHttpClient.Builder()
-//            .addInterceptor {
-//                val original = it.request()
-//                val newRequestBuilder = original.newBuilder()
-//                newRequestBuilder.addHeader("X-Api-Key", BuildConfig.API_KEY)
-//                it.proceed(newRequestBuilder.build())
-//            }
             .callTimeout(1, TimeUnit.MINUTES)
             .readTimeout(1, TimeUnit.MINUTES)
             .writeTimeout(1, TimeUnit.MINUTES)
@@ -60,12 +55,16 @@ object AppModule {
     @Singleton
     fun provideContactDatabase(app: Application): ContactDatabase {
         return Room.databaseBuilder(app, ContactDatabase::class.java, ContactDatabase.DATABASE_NAME)
+            .allowMainThreadQueries()
             .build()
     }
 
     @Provides
     fun provideContactService(retrofit: Retrofit): ContactService =
         retrofit.create(ContactService::class.java)
+
+    @Provides
+    fun provideNewsRepository(contactService: ContactService, contactDataSource: ContactDataSource): ContactRepository = ContactRepository(contactService,contactDataSource)
 
 }
 

@@ -5,7 +5,6 @@ import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.widget.ScrollView
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -15,16 +14,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -43,22 +37,19 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import com.ab.contactsapp.R
-import com.ab.contactsapp.domain.contact.SocialMedia
+import com.ab.contactsapp.domain.model.SocialMedia
 import com.ab.contactsapp.ui.composables.RoundedBorderIcon
 import com.ab.contactsapp.ui.composables.RoundedTabView
 import com.ab.contactsapp.utils.Constants
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
-import com.ab.contactsapp.domain.contact.Contact
-import com.ab.contactsapp.domain.contact.Route
+import com.ab.contactsapp.domain.model.Contact
+import com.ab.contactsapp.utils.Route
 import com.ab.contactsapp.rememberWindowInfo
 import com.ab.contactsapp.ui.composables.DropDownMenu
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
@@ -127,7 +118,7 @@ fun ContactDetailScreen(
 
 
                             Image(
-                                painter = if(contact?.photo!=null)  rememberAsyncImagePainter(contact!!.photo) else painterResource(id = R.drawable.ic_person), // your clear image
+                                painter = if(contact?.photo!=null || contact?.photoUrl != null) rememberAsyncImagePainter(contact?.photo?:contact?.photoUrl) else painterResource(id = R.drawable.ic_person), // your clear image
                                 contentDescription = null,
                                 modifier = Modifier
                                     .size(120.dp)
@@ -267,7 +258,7 @@ fun ContactDetailScreen(
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun ContactActionsRow(modifier: Modifier, contact: Contact,viewModel: ContactListViewModel) {
+fun ContactActionsRow(modifier: Modifier, contact: Contact, viewModel: ContactListViewModel) {
     val context = LocalContext.current
     val callPermissionState = rememberPermissionState(Manifest.permission.CALL_PHONE)
 
@@ -317,7 +308,7 @@ fun ContactActionsRow(modifier: Modifier, contact: Contact,viewModel: ContactLis
 }
 
 @Composable
-fun SocialMediaAndRecentTab(modifier: Modifier = Modifier,contact: Contact,viewModel: ContactListViewModel){
+fun SocialMediaAndRecentTab(modifier: Modifier = Modifier, contact: Contact, viewModel: ContactListViewModel){
 
     var selectedTabIndex by remember {
         mutableStateOf(0)
@@ -349,7 +340,7 @@ fun SocialMediaAndRecentTab(modifier: Modifier = Modifier,contact: Contact,viewM
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun SocialMediaAndRecentList(modifier: Modifier, isSocialMediaTab : Boolean,contact: Contact,viewModel: ContactListViewModel){
+fun SocialMediaAndRecentList(modifier: Modifier, isSocialMediaTab : Boolean, contact: Contact, viewModel: ContactListViewModel){
     val context = LocalContext.current
     val windowInfo =  rememberWindowInfo()
     val callLogGroups by viewModel.callLogEntries.collectAsState(initial = listOf())

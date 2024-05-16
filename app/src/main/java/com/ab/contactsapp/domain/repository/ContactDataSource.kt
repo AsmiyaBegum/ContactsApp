@@ -1,10 +1,10 @@
-package com.ab.contactsapp.domain.contact
+package com.ab.contactsapp.domain.repository
+
+import com.ab.contactsapp.domain.model.Contact
 
 
 interface ContactDataSource {
     suspend fun insertContact(contactList : List<Contact>)
-
-    suspend fun getAllContacts() : List<Contact>
 
     suspend fun deleteAllContact()
 

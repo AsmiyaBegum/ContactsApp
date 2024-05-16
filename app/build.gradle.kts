@@ -26,11 +26,7 @@ android {
         vectorDrawables {
             useSupportLibrary = true
         }
-
-        val properties = Properties()
-        properties.load(FileReader("local.properties"))
-        val baseUrl = properties.getProperty("base_url")
-        buildConfigField("String","BASE_URL",baseUrl)
+        buildConfigField("String", "BASE_URL", "\"https://randomuser.me/\"")
     }
 
     buildTypes {

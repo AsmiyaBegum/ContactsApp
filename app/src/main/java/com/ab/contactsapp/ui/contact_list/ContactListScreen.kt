@@ -17,14 +17,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -33,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -49,7 +48,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -59,11 +57,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.rememberAsyncImagePainter
 import com.ab.contactsapp.WindowInfo
-import com.ab.contactsapp.domain.contact.Contact
-import com.ab.contactsapp.domain.contact.Route
+import com.ab.contactsapp.domain.model.Contact
+import com.ab.contactsapp.utils.Route
 import com.ab.contactsapp.rememberWindowInfo
 import com.ab.contactsapp.ui.composables.HideableSearchTextField
 import com.ab.contactsapp.ui.composables.RoundedCornerButton
@@ -83,15 +82,11 @@ fun ContactsScreen(
     onItemClick: (Contact) -> Unit,
     modifier: Modifier
 ) {
-    val contacts = if (state.selectedTab == Constants.PHONE_CONTACTS) {
-        state.contacts
-    } else {
-        state.randomContact
-    }
+    val contacts = state.contacts
+    val showLoader by viewModel.showLoader.collectAsState(initial = false)
     val groupedContacts = groupContacts(contacts)
     var targetGroup by remember { mutableStateOf<Pair<Char, Int>?>(null) }
     val listState = rememberLazyListState()
-//    val randomContacts = viewModel.getBreakingNews().collectAsLazyPagingItems()
 
 
     LaunchedEffect(targetGroup) {
@@ -108,9 +103,9 @@ fun ContactsScreen(
         contentAlignment = Alignment.Center
     ) {
         if (state.selectedTab == Constants.PHONE_CONTACTS) {
-            ContactList(groupedContacts, listState,modifier, onItemClick = onItemClick)
+            ContactList(groupedContacts, listState,modifier, onItemClick = onItemClick,showLoader)
         }else{
-//            RandomContactList(randomContacts)
+            RandomContactList(viewModel.getRandomContacts().collectAsLazyPagingItems(), listState, onItemClick = onItemClick)
         }
     }
 }
@@ -147,18 +142,28 @@ fun ContactList(
     groupedContacts: Map<Char, List<Contact>>,
     scrollState: LazyListState,
     modifier: Modifier,
-    onItemClick: (Contact) -> Unit
+    onItemClick: (Contact) -> Unit,
+    showLoader : Boolean
 ) {
     if(groupedContacts.isEmpty()){
         Box(
             modifier = modifier.fillMaxSize(),
         ) {
-            Text(
-                modifier = Modifier
-                    .padding(bottom = 30.dp)
-                    .align(Alignment.Center),
-                textAlign = TextAlign.Center,
-                text = "No contact found")
+
+            if(showLoader){
+                CircularProgressIndicator(
+                    modifier = Modifier
+                        .padding(bottom = 30.dp)
+                        .align(Alignment.Center)
+                )
+            }else{
+                Text(
+                    modifier = Modifier
+                        .padding(bottom = 30.dp)
+                        .align(Alignment.Center),
+                    textAlign = TextAlign.Center,
+                    text = "No contact found")
+            }
         }
 
 
@@ -180,6 +185,8 @@ fun ContactList(
                 }
                 items(contacts) { contact ->
                     ContactItem(contact, onItemClick)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Divider(color = MaterialTheme.colorScheme.inverseOnSurface, thickness = 1.dp)
                 }
             }
         }
@@ -231,7 +238,7 @@ private fun calculateScrollPosition(
 
 
 @Composable
-fun ContactItem(contact: Contact,onItemClick: (Contact) -> Unit) {
+fun ContactItem(contact: Contact, onItemClick: (Contact) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -242,9 +249,9 @@ fun ContactItem(contact: Contact,onItemClick: (Contact) -> Unit) {
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         // Profile image
-        if(contact.photo!=null){
+        if(contact.photo!=null || contact.photoUrl != null) {
             Image(
-                painter = rememberAsyncImagePainter(contact.photo),
+                painter = rememberAsyncImagePainter(contact.photo?:contact.photoUrl),
                 contentDescription = "Profile Picture",
                 modifier = Modifier
                     .size(50.dp)
@@ -488,41 +495,49 @@ fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListVie
 
 @Composable
 fun RandomContactList(
-    beers: LazyPagingItems<Contact>
+    pagingContact: LazyPagingItems<Contact>,
+    listState: LazyListState,
+    onItemClick: (Contact) -> Unit
 ) {
+
     val context = LocalContext.current
-    LaunchedEffect(key1 = beers.loadState) {
-        if(beers.loadState.refresh is LoadState.Error) {
+    LaunchedEffect(key1 = pagingContact.loadState) {
+        if(pagingContact.loadState.refresh is LoadState.Error) {
             Toast.makeText(
                 context,
-                "Error: " + (beers.loadState.refresh as LoadState.Error).error.message,
+                "Error: " + (pagingContact.loadState.refresh as LoadState.Error).error.message,
                 Toast.LENGTH_LONG
             ).show()
         }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        if(beers.loadState.refresh is LoadState.Loading) {
+        if(pagingContact.loadState.refresh is LoadState.Loading) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center)
             )
         } else {
             LazyColumn(
+                state = listState,
                 modifier = Modifier.fillMaxSize(),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                items(beers) { beer ->
-                    if(beer != null) {
+                items(pagingContact) { contact ->
+                    if(contact != null) {
                         ContactItem(
-                            contact = beer
+                            contact = contact
                         ){
-
+                            contact.isRandomContact = true
+                            onItemClick(contact)
                         }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Divider(color = MaterialTheme.colorScheme.inverseOnSurface, thickness = 1.dp)
                     }
+
                 }
                 item {
-                    if(beers.loadState.append is LoadState.Loading) {
+                    if(pagingContact.loadState.append is LoadState.Loading) {
                         CircularProgressIndicator()
                     }
                 }

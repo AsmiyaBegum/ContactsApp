@@ -5,8 +5,9 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ab.contactsapp.contactHelper.editContact
-import com.ab.contactsapp.domain.contact.Contact
+import com.ab.contactsapp.domain.model.Contact
 import com.ab.contactsapp.utils.ContactInfoArgType
+import com.google.gson.Gson
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -58,8 +59,8 @@ class ContactCreationViewmodel @Inject constructor(
 
 
     init {
-        val contact = ContactInfoArgType().fromJsonParse(savedStateHandle.get<String>("contact")?:"")
-        contact.let{ contact ->
+        val contact = ContactInfoArgType().fromJsonParse(savedStateHandle.get<String>("contact")?: Gson().toJson(Contact()))
+        contact?.let{ contact ->
             viewModelScope.launch(Dispatchers.IO) {
                 existingContactId = contact.contactId.toLongOrNull()?:-1L
                 val multipleNames = contact.name?.split(" ")?.size?:0

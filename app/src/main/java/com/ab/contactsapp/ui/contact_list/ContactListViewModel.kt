@@ -2,39 +2,34 @@ package com.ab.contactsapp.ui.contact_list
 
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.ContactsContract
-import android.telecom.TelecomManager
-import android.widget.Toast
+import android.util.Log
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.ab.contactsapp.contactHelper.contact
 import com.ab.contactsapp.contactHelper.getCallLogDetails
 import com.ab.contactsapp.contactHelper.markContactAsFavorite
-import com.ab.contactsapp.domain.contact.CallLogEntry
-import com.ab.contactsapp.domain.contact.CallLogGroup
-import com.ab.contactsapp.domain.contact.Contact
-import com.ab.contactsapp.domain.contact.ContactInfo
-import com.ab.contactsapp.domain.contact.ContactDataSource
-import com.ab.contactsapp.domain.contact.SearchContact
-import com.ab.contactsapp.domain.contact.mockContacts
+import com.ab.contactsapp.domain.model.CallLogEntry
+import com.ab.contactsapp.domain.model.CallLogGroup
+import com.ab.contactsapp.domain.model.Contact
+import com.ab.contactsapp.domain.repository.ContactDataSource
+import com.ab.contactsapp.utils.SearchContact
+import com.ab.contactsapp.domain.usecase.ContactScreenUseCase
 import com.ab.contactsapp.ui.base.BaseViewModel
 import com.ab.contactsapp.utils.Constants
-import com.ab.contactsapp.utils.sortByCustomOrder
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -44,6 +39,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ContactListViewModel  @Inject constructor(
     private val contactDataSource: ContactDataSource,
+    private val useCase: ContactScreenUseCase,
     private val savedStateHandle: SavedStateHandle
 ) : BaseViewModel() {
 
@@ -52,6 +48,37 @@ class ContactListViewModel  @Inject constructor(
 
     private val _callLogEntries = MutableStateFlow<List<CallLogGroup>>(emptyList())
     val callLogEntries: Flow<List<CallLogGroup>> = _callLogEntries.asStateFlow()
+    private val _showLoader = MutableStateFlow<Boolean>(false)
+    val showLoader : Flow<Boolean> = _showLoader.asStateFlow()
+
+    init {
+        Log.d("recompose","recompose")
+    }
+
+    private val cachedRandomContacts = MutableStateFlow<Flow<PagingData<Contact>>>(flowOf(PagingData.empty()))
+
+    init {
+        deleteRandomContacts()
+        fetchRandomContacts()
+    }
+
+    private fun fetchRandomContacts() {
+        viewModelScope.launch {
+            val randomContacts = useCase.getRemoteContacts().flow.cachedIn(viewModelScope)
+            cachedRandomContacts.value = randomContacts
+        }
+    }
+
+    fun getRandomContacts(): Flow<PagingData<Contact>> {
+        return cachedRandomContacts.value
+    }
+
+
+    private fun deleteRandomContacts() {
+        viewModelScope.launch {
+            useCase.deleteRemoveContacts()
+        }
+    }
 
     fun getCallLogForNumber(contentResolver: ContentResolver, phoneNumber: String) {
         viewModelScope.launch {
@@ -91,10 +118,9 @@ class ContactListViewModel  @Inject constructor(
     private val contacts = savedStateHandle.getStateFlow("contacts", emptyList<Contact>())
     private val searchText = savedStateHandle.getStateFlow("searchText", "")
     private val selectedTab = savedStateHandle.getStateFlow("selectedTab", Constants.PHONE_CONTACTS)
-    private val randomContact = savedStateHandle.getStateFlow("randomContacts", emptyList<Contact>())
     private val isSearchActive = savedStateHandle.getStateFlow("isSearchActive", false)
 
-    val state = combine(contacts, searchText,randomContact,selectedTab,isSearchActive){ contacts, searchText,randomContacts,selectedTab,isSearchActive  ->
+    val state = combine(contacts, searchText,selectedTab,isSearchActive){ contacts, searchText,selectedTab,isSearchActive  ->
 
         ContactListState(
             contacts = if(selectedTab == Constants.PHONE_CONTACTS) {
@@ -103,11 +129,6 @@ class ContactListViewModel  @Inject constructor(
                 contacts
             },
             searchText = searchText,
-            randomContact = if(selectedTab == Constants.RANDOM_CONTACTS) {
-                searchContact.searchLocalDeviceContacts(randomContacts,searchText)
-            }else{
-                randomContacts
-            },
             selectedTab = selectedTab,
             isSearchActive = isSearchActive
         )
@@ -116,12 +137,12 @@ class ContactListViewModel  @Inject constructor(
 
 
     fun loadcontacts(context: Context){
+        _showLoader.value = true
         viewModelScope.launch(Dispatchers.IO) {
             if(selectedTab.value == Constants.PHONE_CONTACTS){
                 savedStateHandle["contacts"] = contact(contentResolver = context.contentResolver)
-            }else{
-                savedStateHandle["randomContacts"] = mockContacts.sortByCustomOrder { it.name?:"" }
             }
+            _showLoader.value = false
         }
     }
 
@@ -134,7 +155,8 @@ class ContactListViewModel  @Inject constructor(
     fun onTabSelected(tabIndex : Int){
         viewModelScope.launch {
             savedStateHandle["searchText"] = ""
-         val tabName = if (tabIndex == 0) Constants.PHONE_CONTACTS else Constants.RANDOM_CONTACTS
+            savedStateHandle["isSearchActive"] = false
+            val tabName = if (tabIndex == 0) Constants.PHONE_CONTACTS else Constants.RANDOM_CONTACTS
             savedStateHandle["selectedTab"] = tabName
         }
     }
@@ -144,7 +166,6 @@ class ContactListViewModel  @Inject constructor(
         savedStateHandle["isSearchActive"] = !isSearchActive.value
         if(!isSearchActive.value){
             savedStateHandle["searchText"] = ""
-
         }
     }
 

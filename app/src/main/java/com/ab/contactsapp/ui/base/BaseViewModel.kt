@@ -1,6 +1,5 @@
 package com.ab.contactsapp.ui.base
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateListOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -8,12 +7,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.net.HttpURLConnection
-import androidx.compose.runtime.mutableStateOf
-import androidx.navigation.NavController
-import androidx.navigation.compose.rememberNavController
-import com.ab.contactsapp.domain.contact.Contact
-import javax.inject.Singleton
 
 
 data class Event<out T>(val content : T, val hasBeenHandled : Boolean = false)

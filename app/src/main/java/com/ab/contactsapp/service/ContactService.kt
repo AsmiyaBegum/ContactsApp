@@ -1,6 +1,6 @@
 package com.ab.contactsapp.service
 
-import com.ab.contactsapp.domain.contact.ContactInfoResponse
+import com.ab.contactsapp.domain.model.ContactInfoResponse
 import com.ab.contactsapp.utils.Constants
 import retrofit2.http.GET
 import retrofit2.http.Query

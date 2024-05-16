@@ -1,50 +1,45 @@
 package com.ab.contactsapp
 
-import android.os.Bundle
-import androidx.activity.ComponentActivity
-import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
-import com.ab.contactsapp.ui.contact_list.ContactListScreen
-import dagger.hilt.android.AndroidEntryPoint
 import android.Manifest
 import android.app.Activity
+import android.app.ActivityOptions
+import android.content.Context
 import android.content.Intent
+import android.graphics.Rect
 import android.net.Uri
+import android.os.Bundle
 import android.provider.Settings
+import android.util.DisplayMetrics
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.ab.contactsapp.domain.contact.Contact
-import com.ab.contactsapp.domain.contact.Route
-import com.ab.contactsapp.permission.ReadContactPermissionTextProvider
-import com.ab.contactsapp.permission.PermissionDialog
-import com.ab.contactsapp.permission.WriteContactPermissionTextProvider
+import com.ab.contactsapp.domain.model.Contact
 import com.ab.contactsapp.ui.base.BaseViewModel
 import com.ab.contactsapp.ui.composables.SearchBar
 import com.ab.contactsapp.ui.contact_create.ContactCreateScreen
 import com.ab.contactsapp.ui.contact_detail.CallLogScreen
+import com.ab.contactsapp.ui.contact_detail.ContactDetailScreen
 import com.ab.contactsapp.ui.contact_list.AdaptiveContactScreen
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
 import com.ab.contactsapp.utils.Constants
 import com.ab.contactsapp.utils.ContactInfoArgType
-import com.ab.contactsapp.utils.Utils
+import com.ab.contactsapp.utils.Route
 import com.example.compose.AppTheme
-import com.google.accompanist.permissions.shouldShowRationale
 import com.google.gson.Gson
+import dagger.hilt.android.AndroidEntryPoint
 
 
 const val PERMISSION_REQUEST_CODE = 101
@@ -134,6 +129,7 @@ class MainActivity : ComponentActivity() {
     @Composable
     fun MainContent() {
         val navController = rememberNavController()
+        val context : Context = LocalContext.current
         val viewModel: ContactListViewModel = hiltViewModel()
         val windowInfo = rememberWindowInfo()
         val readContactPermissionResultLauncher = rememberLauncherForActivityResult(

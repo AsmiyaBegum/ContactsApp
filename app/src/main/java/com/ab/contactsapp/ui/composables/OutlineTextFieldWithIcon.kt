@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.ab.contactsapp.ui.contact_list.visible
@@ -26,7 +27,7 @@ fun OutlinedTextFieldWithIcon(
     imageVector: ImageVector?,
     onValueChanged : (String) -> Unit,
     fieldValue : String,
-    keyboardOptions: KeyboardOptions = KeyboardOptions.Default
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
 ){
     Row(
         modifier = modifier,

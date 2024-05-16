@@ -1,4 +1,4 @@
-package com.ab.contactsapp.domain.contact
+package com.ab.contactsapp.utils
 
 object Route {
     const val CONTACT_LIST_SCREEN = "contact_list_screen"

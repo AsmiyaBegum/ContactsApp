@@ -14,6 +14,7 @@ object Constants {
     const val DELETE = "Delete"
     const val MARK_AS_FAV = "Mark As Favorite"
     const val CALL_LOGS = "Call History"
-    val OPTION_MENU_LIST = listOf(CALL_LOGS, MARK_AS_FAV, DELETE)
+    const val EDIT_CONTACT = "Edit Contact"
+    val OPTION_MENU_LIST = listOf(CALL_LOGS, MARK_AS_FAV, EDIT_CONTACT, DELETE)
 
 }

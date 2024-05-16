@@ -276,7 +276,7 @@ fun editContact(context: Context,contact: Contact) {
         // Update Photo
         if (contact.photo != null) {
             val photoValues = ContentValues().apply {
-                put(ContactsContract.CommonDataKinds.Photo.PHOTO, contact.photo)
+                put(ContactsContract.CommonDataKinds.Photo.PHOTO_ID, contact.photo)
             }
             context.contentResolver.update(
                 ContactsContract.Data.CONTENT_URI,
@@ -364,7 +364,7 @@ fun contact(contentResolver: ContentResolver) : List<Contact> {
                 val contactId: Int =
                     cur.getInt(cur.getColumnIndex(ContactsContract.Data.CONTACT_ID))
                 val name: String =
-                    cur.getString(cur.getColumnIndex(ContactsContract.Data.DISPLAY_NAME_PRIMARY))
+                    cur.getString(cur.getColumnIndex(ContactsContract.Data.DISPLAY_NAME))
                 val emailOrMobile: String? =
                     cur.getString(cur.getColumnIndex(ContactsContract.Data.DATA1))
                 val photoByteArray = if(contactId!=null){

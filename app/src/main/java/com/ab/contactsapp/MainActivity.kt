@@ -41,6 +41,7 @@ import com.ab.contactsapp.ui.contact_list.AdaptiveContactScreen
 import com.ab.contactsapp.ui.contact_list.ContactListViewModel
 import com.ab.contactsapp.utils.Constants
 import com.ab.contactsapp.utils.ContactInfoArgType
+import com.ab.contactsapp.utils.Utils
 import com.example.compose.AppTheme
 import com.google.accompanist.permissions.shouldShowRationale
 import com.google.gson.Gson
@@ -134,6 +135,7 @@ class MainActivity : ComponentActivity() {
     fun MainContent() {
         val navController = rememberNavController()
         val viewModel: ContactListViewModel = hiltViewModel()
+        val windowInfo = rememberWindowInfo()
         val readContactPermissionResultLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.RequestPermission(),
             onResult = { isGranted ->
@@ -169,7 +171,10 @@ class MainActivity : ComponentActivity() {
                     val contact = backStackEntry.arguments?.getString("contact")?.let { Gson().fromJson(it, Contact::class.java) }
                     contact?.let {
                         AppTheme {
-                            ContactCreateScreen(it,navController)
+                            ContactCreateScreen(it,navController){ contact ->
+                                viewModel.updateSelectedContact(contact)
+                                navController.popBackStack()
+                            }
                         }
                     } ?: run {
                         // Handle case when parameter is null

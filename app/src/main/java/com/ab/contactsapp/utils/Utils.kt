@@ -20,7 +20,7 @@ object Utils {
     }
 
     fun isCompactOrMedium(windowInfo: WindowInfo) : Boolean{
-       return windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium
+        return windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium
     }
 
     fun isCompact(windowInfo: WindowInfo) : Boolean{

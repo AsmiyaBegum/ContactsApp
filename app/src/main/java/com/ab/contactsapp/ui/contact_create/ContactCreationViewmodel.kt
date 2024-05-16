@@ -1,8 +1,6 @@
 package com.ab.contactsapp.ui.contact_create
 
-import android.content.ContentValues
 import android.content.Context
-import android.provider.ContactsContract
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,6 +29,7 @@ class ContactCreationViewmodel @Inject constructor(
     private val email = savedStateHandle.getStateFlow("email", "")
     private val photo : StateFlow<ByteArray?> = savedStateHandle.getStateFlow("photo", null)
 
+     var contact : Contact? = null
 
     val state = combine(
         firstName,
@@ -53,9 +52,9 @@ class ContactCreationViewmodel @Inject constructor(
 
 
     private val _hasNotBeenSaved = MutableStateFlow(false)
-    val hasNotBeenSaved = _hasNotBeenSaved.asStateFlow()
+    val hasContactBeenSaved = _hasNotBeenSaved.asStateFlow()
 
-    private var existingContactId : Long = -1
+    var existingContactId : Long = -1
 
 
     init {
@@ -63,8 +62,9 @@ class ContactCreationViewmodel @Inject constructor(
         contact.let{ contact ->
             viewModelScope.launch(Dispatchers.IO) {
                 existingContactId = contact.contactId.toLongOrNull()?:-1L
-                savedStateHandle["firstName"] = contact.name
-                savedStateHandle["lastName"] = contact.lastName
+                val multipleNames = contact.name?.split(" ")?.size?:0
+                savedStateHandle["firstName"] = if(multipleNames > 1) contact.name?.split(" ")?.take(multipleNames-1)?.joinToString(" ") else contact.name
+                savedStateHandle["lastName"] = if(multipleNames > 1) contact.name?.split(" ")?.lastOrNull() else ""
                 savedStateHandle["phone"] = contact.phoneNumber
                 savedStateHandle["email"] = contact.email
                 savedStateHandle["photo"] = contact.photo
@@ -97,7 +97,7 @@ class ContactCreationViewmodel @Inject constructor(
 
     fun saveContact(context : Context) {
         viewModelScope.launch(Dispatchers.IO) {
-           val contact =  Contact(
+            contact =  Contact(
                 name = state.value.firstName,
                 lastName = state.value.lastName,
                 phoneNumber = state.value.phone,
@@ -106,10 +106,10 @@ class ContactCreationViewmodel @Inject constructor(
                contactId =  existingContactId.toString()
             )
             if(existingContactId!=-1L){
-                editContact(context, contact)
+                editContact(context, contact!!)
             }else{
                 com.ab.contactsapp.contactHelper.saveContact(context,
-                    contact
+                    contact!!
                 )
             }
 

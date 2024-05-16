@@ -19,7 +19,7 @@ data class ContactInfoResponse(
 @Entity
 data class  Contact(
     var name: String? = "",
-    val lastName : String? = "",
+    var lastName : String? = "",
     var phoneNumber: String? = "",
     var email: String? = "",
     @PrimaryKey var contactId: String = UUID.randomUUID().toString(),

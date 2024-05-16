@@ -107,17 +107,14 @@ fun CallLogList(calls : List<CallLogGroup>){
             }
 
         }else{
-            Box(
-                modifier = Modifier.fillMaxSize(),
-            ) {
-
-                Text(
-                        modifier = Modifier
-                            .padding(bottom = 30.dp)
-                            .align(Alignment.Center),
-                        textAlign = TextAlign.Center,
-                        text = context.resources.getString(R.string.no_call_logs))
-            }
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+                    .padding(top = 30.dp),
+                textAlign = TextAlign.Center,
+                text = context.resources.getString(R.string.no_call_logs)
+            )
         }
 
 

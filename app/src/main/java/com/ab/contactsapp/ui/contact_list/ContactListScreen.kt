@@ -211,25 +211,9 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                     .align(Alignment.CenterHorizontally)
             )
 
-
-            ContactsScreen(
-                viewModel,
-                state,
-                onItemClick = { contact ->
-                    viewModel.updateSelectedContact(contact)
-                    if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
-                        navController.navigate(Route.CONTACT_DETAIL_SCREEN)
-                    }
-                },
-                modifier = Modifier
-                    .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
-            )
-
-
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
                     .align(Alignment.CenterHorizontally)
                     .visible(!(readContactPermissionState.status.isGranted || selectedTabIndex == 1)),
                 verticalArrangement = Arrangement.Center,
@@ -255,6 +239,22 @@ fun ContactListScreen(modifier: Modifier,navController: NavController,viewModel:
                     buttonContentColor = MaterialTheme.colorScheme.onSecondary
                 )
             }
+
+
+            ContactsScreen(
+                viewModel,
+                state,
+                onItemClick = { contact ->
+                    viewModel.updateSelectedContact(contact)
+                    if(windowInfo.screenWidthInfo is WindowInfo.WindowType.Compact || windowInfo.screenWidthInfo is WindowInfo.WindowType.Medium){
+                        navController.navigate(Route.CONTACT_DETAIL_SCREEN)
+                    }
+                },
+                modifier = Modifier
+                    .visible((readContactPermissionState.status.isGranted || selectedTabIndex == 1))
+            )
+
+
 
 
 

@@ -143,6 +143,11 @@ class ContactListViewModel  @Inject constructor(
         }
     }
 
+    fun updateSelectedContactAndRefreshContacts(selectedContact: Contact){
+        updateSelectedContact(selectedContact)
+        loadcontacts(ContactApp.applicationContext())
+    }
+
 
     fun loadcontacts(context: Context){
         _showLoader.value = true

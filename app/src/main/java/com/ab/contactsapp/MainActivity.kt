@@ -1,6 +1,5 @@
 package com.ab.contactsapp
 
-import android.Manifest
 import android.app.Activity
 import android.app.ActivityOptions
 import android.content.Context
@@ -75,7 +74,7 @@ class MainActivity : ComponentActivity() {
                     contact?.let {
                         AppTheme {
                             ContactCreateScreen(it,navController){ contact ->
-                                viewModel.updateSelectedContact(contact)
+                                viewModel.updateSelectedContactAndRefreshContacts(contact)
                                 navController.popBackStack()
                             }
                         }
@@ -99,7 +98,7 @@ class MainActivity : ComponentActivity() {
                         }else{
                             navController.navigate(Route.CONTACT_LIST_SCREEN){
                                 popUpTo(Route.CONTACT_LIST_SCREEN) {
-                                    inclusive = true
+                                    inclusive = false
                                 }
                             }
                         }

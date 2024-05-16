@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -98,8 +97,6 @@ fun AdaptiveContactScreen(navController: NavController,viewModel: ContactListVie
             ) { menu ->
                 if(menu == Constants.CALL_LOGS){
                     navController.navigate(Route.CALL_LOG_SCREEN)
-                }else{
-                    navController.navigate(Route.CONTACT_DETAIL_SCREEN)
                 }
             }
         }

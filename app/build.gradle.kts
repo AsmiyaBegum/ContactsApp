@@ -1,5 +1,3 @@
-import java.io.FileReader
-import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -89,21 +87,20 @@ dependencies {
     implementation(libs.coil)
 
     //Material Theme
-    implementation("androidx.compose.material:material:1.6.7")
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation("com.github.skydoves:cloudy:0.1.2")
+    implementation(libs.androidx.material)
+    implementation(libs.androidx.constraintlayout.compose)
 
 
-    annotationProcessor("androidx.room:room-compiler:2.6.1")
+    annotationProcessor(libs.androidx.room.compiler)
 
-    implementation("androidx.hilt:hilt-navigation-compose:1.1.0")
+    implementation(libs.androidx.hilt.navigation.compose.v110)
     // Room
-    implementation("androidx.room:room-runtime:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
-    implementation("androidx.room:room-paging:2.6.1")
+    implementation(libs.androidx.room.runtime)
+    ksp(libs.androidx.room.compiler)
+    implementation(libs.androidx.room.paging)
 
     // Kotlin Extensions and Coroutines support for Room
-    implementation("androidx.room:room-ktx:2.6.1")
+    implementation(libs.androidx.room.ktx)
 
     // Retrofit
     implementation(libs.retrofit)
@@ -111,10 +108,10 @@ dependencies {
     implementation(libs.retrofit.coroutine.core)
     implementation(libs.retrofit.gson.converter)
 
-    implementation("androidx.navigation:navigation-compose:2.4.0-alpha10")
-    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+    implementation(libs.androidx.navigation.compose)
+    implementation(libs.accompanist.permissions)
 
-    implementation("androidx.paging:paging-runtime-ktx:3.1.1")
-    implementation("androidx.paging:paging-compose:1.0.0-alpha18")
+    implementation(libs.androidx.paging.runtime.ktx)
+    implementation(libs.androidx.paging.compose)
 
 }

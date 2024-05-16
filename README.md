@@ -82,5 +82,5 @@ The Contact Application is an Android native app that allows users to manage the
 
 **Adaptive Theme** :
 
-<img width="300" height="100" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.44.23%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144036.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
+<img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144036.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/Screenshot_20240516_144049.png"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 

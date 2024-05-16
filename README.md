@@ -31,7 +31,7 @@ The Contact Application is an Android native app that allows users to manage the
 
 1. Clone the repository:
     bash
-    git clone https://github.com/yourusername/contact-app.git
+    git clone https://github.com/AsmiyaBegum/ContactsApp
     
 2. Open the project in Android Studio.
 3. Sync the project with Gradle files.

@@ -77,7 +77,7 @@ The Contact Application is an Android native app that allows users to manage the
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.32.27%20PM%20(1).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.32.27%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.32.26%20PM%20(1).jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.32.26%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.32.26%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-17%20at%202.38.51%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <img width="150" height="300" src="https://github.com/AsmiyaBegum/ContactsApp/blob/main/screenshots/WhatsApp%20Image%202024-05-16%20at%202.32.25%20PM.jpeg"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
 **Dynamic Theme** :
